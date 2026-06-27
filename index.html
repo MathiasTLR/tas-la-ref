@@ -291,6 +291,138 @@
 </div>
 
 <!-- ============================================================ -->
+<!-- MANCHE 2 — VISUELS -->
+<!-- ============================================================ -->
+<div id="screen-m2" class="screen">
+  <div class="q-header">
+    <span class="q-round-label">M2 – Visuels</span>
+    <div class="q-progress-wrap"><div class="q-progress" id="m2-progress" style="width:0%"></div></div>
+    <div class="q-counters">
+      <span class="q-score" id="m2-score">0 pt</span>
+      <span class="q-mots" id="m2-mots">🎤 0</span>
+    </div>
+  </div>
+  <div class="manche-progress" id="m2-dots"></div>
+  <!-- Image -->
+  <div style="width:100%;border-radius:18px;overflow:hidden;background:#0F172A;margin-bottom:16px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;">
+    <img id="m2-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';document.getElementById('m2-img-fallback').style.display='flex'" />
+    <div id="m2-img-fallback" style="display:none;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:.85rem;">
+      <div style="font-size:3rem">🖼️</div>
+      <div id="m2-img-name"></div>
+    </div>
+  </div>
+  <!-- 4 boutons catégorie -->
+  <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="m2-buttons">
+    <button class="ans-btn" onclick="selectVisual('film')">🎬 Film</button>
+    <button class="ans-btn" onclick="selectVisual('serie')">📺 Série Télé</button>
+    <button class="ans-btn" onclick="selectVisual('pub')">📣 Pub</button>
+    <button class="ans-btn" onclick="selectVisual('jeu-video')">🎮 Jeu Vidéo</button>
+  </div>
+  <!-- Feedback -->
+  <div class="feedback" id="m2-feedback"></div>
+  <!-- Mots d'impro milestone -->
+  <div id="m2-milestone" style="display:none;margin-top:12px;text-align:center"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FIN MANCHE 2 — SCORE INTERMÉDIAIRE -->
+<!-- ============================================================ -->
+<div id="screen-m2-end" class="screen">
+  <div style="text-align:center;width:100%">
+    <div style="font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Fin de la manche Visuels</div>
+    <div style="font-size:4rem;margin-bottom:4px">🖼️</div>
+    <div style="font-size:3rem;font-weight:900;color:var(--yellow);line-height:1" id="m2-end-score">0</div>
+    <div style="font-size:.95rem;color:var(--muted);margin-bottom:20px" id="m2-end-score-label">/ 8 pts</div>
+    <div style="background:rgba(108,63,200,.15);border:1.5px solid var(--purple);border-radius:16px;padding:18px;margin-bottom:28px">
+      <div style="font-size:.8rem;color:#A78BFA;font-weight:700;margin-bottom:4px">MOTS D'IMPRO TOTAL</div>
+      <div style="font-size:2rem;font-weight:900;color:#A78BFA" id="m2-end-mots">🎤 0</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">+1 mot tous les 5 points cumulés</div>
+    </div>
+    <div style="background:var(--card);border-radius:14px;padding:14px 18px;margin-bottom:24px;font-size:.95rem;font-weight:700;text-align:center" id="m2-end-genre"></div>
+    <button class="btn" onclick="goToManche3()">Manche suivante →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FIN MANCHE 1 — SCORE INTERMÉDIAIRE -->
+<!-- ============================================================ -->
+<div id="screen-m1-end" class="screen">
+  <div style="text-align:center;width:100%">
+    <div style="font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Fin de la manche Musiques</div>
+    <div style="font-size:4rem;margin-bottom:4px">🎵</div>
+    <div style="font-size:3rem;font-weight:900;color:var(--yellow);line-height:1" id="m1-end-score">0</div>
+    <div style="font-size:.95rem;color:var(--muted);margin-bottom:20px" id="m1-end-score-label">/ 4 pts</div>
+    <div style="background:rgba(108,63,200,.15);border:1.5px solid var(--purple);border-radius:16px;padding:18px;margin-bottom:28px">
+      <div style="font-size:.8rem;color:#A78BFA;font-weight:700;margin-bottom:4px">MOTS D'IMPRO GAGNÉS</div>
+      <div style="font-size:2rem;font-weight:900;color:#A78BFA" id="m1-end-mots">🎤 0</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">utilisables en finale</div>
+    </div>
+    <button class="btn" onclick="goToManche2()">Manche suivante →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MANCHE 3 — VISAGE PIXELÉ -->
+<!-- ============================================================ -->
+<div id="screen-m3" class="screen">
+  <!-- Header -->
+  <div class="q-header">
+    <span class="q-round-label">M3 – Visage pixelé</span>
+    <div class="q-progress-wrap"><div class="q-progress" style="width:66%"></div></div>
+    <div class="q-counters">
+      <span class="q-score" id="m3-score">0 pt</span>
+      <span class="q-mots" id="m3-mots">🎤 0</span>
+    </div>
+  </div>
+
+  <!-- Audio (caché) -->
+  <audio id="m3-audio"></audio>
+
+  <!-- Indicateur audio -->
+  <div class="audio-player" style="margin-bottom:12px">
+    <div class="audio-track-num" id="m3-track-label">🔊 Indices en cours…</div>
+    <div class="audio-visual" id="m3-visual">
+      <div class="audio-bar"></div><div class="audio-bar"></div>
+      <div class="audio-bar"></div><div class="audio-bar"></div>
+      <div class="audio-bar"></div><div class="audio-bar"></div>
+      <div class="audio-bar"></div><div class="audio-bar"></div>
+      <div class="audio-bar"></div><div class="audio-bar"></div>
+      <div class="audio-bar"></div><div class="audio-bar"></div>
+    </div>
+  </div>
+
+  <!-- Canvas pixelisé -->
+  <div style="display:flex;justify-content:center;margin-bottom:16px">
+    <canvas id="starCanvas" width="260" height="260"
+      style="border-radius:16px;background:#1a1a2e;display:block"></canvas>
+  </div>
+
+  <!-- Zone BUZZER -->
+  <div id="m3-buzzer-area">
+    <button class="btn" id="m3-buzzer-btn" onclick="pressBuzzer()"
+      style="background:var(--red);font-size:1.3rem;padding:20px;letter-spacing:1px">
+      🔔 BUZZER
+    </button>
+  </div>
+
+  <!-- Zone réponse (masquée) -->
+  <div id="m3-answer-area" style="display:none">
+    <div style="color:var(--muted);font-size:.9rem;margin-bottom:10px;text-align:center">Qui est cette star ?</div>
+    <div class="music-input-wrap">
+      <input class="music-input" id="m3-input" type="text"
+        placeholder="Prénom Nom…" autocomplete="off" autocorrect="off" spellcheck="false"
+        oninput="document.getElementById('m3-validate-btn').disabled = !this.value.trim()"
+        onkeydown="if(event.key==='Enter' && !document.getElementById('m3-validate-btn').disabled) validateStarAnswer()"
+      />
+      <button class="btn" id="m3-validate-btn" onclick="validateStarAnswer()" disabled style="margin-top:10px">Valider</button>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback" id="m3-feedback"></div>
+</div>
+
+<!-- ============================================================ -->
 <!-- INTRO MANCHE -->
 <!-- ============================================================ -->
 <div id="screen-round-intro" class="screen">
@@ -429,32 +561,30 @@ const SONGS = [
   { file:"extrait-04.mp3", title:"Hotel California",                artist:"Eagles",        year:1976, acceptedAnswers:["The Eagles","California"] },
 ];
 
-// ── MANCHES 2-4 ──────────────────────────────────────────────────────────────
+// ── MANCHE 2 : VISUELS ────────────────────────────────────────────────────────
+const VISUALS = [
+  { file:"visuel-01.jpg", correct:"jeu-video", title:"Ride 4" },
+  { file:"visuel-02.jpg", correct:"film",      title:"Eternal Sunshine" },
+  { file:"visuel-03.jpg", correct:"pub",       title:"Ferrero Rochers" },
+  { file:"visuel-04.jpg", correct:"pub",       title:"Vendez votre voiture" },
+  { file:"visuel-05.jpg", correct:"jeu-video", title:"Donkey Kong Bananza" },
+  { file:"visuel-06.jpg", correct:"serie",     title:"6 Feet Under" },
+  { file:"visuel-07.jpg", correct:"film",      title:"Wall-E" },
+  { file:"visuel-08.jpg", correct:"film",      title:"Inception" },
+];
+
+const CAT_LABELS = { film:"Film", serie:"Série Télé", pub:"Pub", "jeu-video":"Jeu Vidéo" };
+
+// ── MANCHE 3 : VISAGE PIXELÉ ─────────────────────────────────────────────────
+const STAR = {
+  audio: "voix-star.mp3",   // fichier dans audio/
+  photo: "star-01.jpg",     // fichier dans images/
+  name: "Jeff Bridges",
+  acceptedAnswers: ["jeff bridges", "bridges", "jeff", "le dude", "dude"]
+};
+
+// ── MANCHE 4 : RÉPLIQUES (MCQ) ───────────────────────────────────────────────
 const ROUNDS_MCQ = [
-  {
-    id: 2,
-    name: "Visuels",
-    icon: "🖼️",
-    color: "#1E90FF",
-    desc: "Identifie la référence culturelle cachée dans l'image.",
-    questions: [
-      { type:"visual", gen:"y", emoji:"💿🎤🕶️", caption:"Icône des années 90 sur scène", answers:["Britney Spears","Backstreet Boys","Spice Girls","Destiny's Child"], correct:2, feedback:"Wannabe (1996) — Zigga zig ah 🤌" },
-      { type:"visual", gen:"x", emoji:"👨‍🦲🔫🕶️", caption:"Agent spécial, permis de tuer", answers:["Mission Impossible","James Bond — GoldenEye","Die Hard","The Matrix"], correct:1, feedback:"GoldenEye (1995), premier Bond pour Pierce Brosnan." },
-      { type:"visual", gen:"z", emoji:"🦑🎮🟩", caption:"Jeu de survie coréen", answers:["Among Us","Fortnite","Squid Game — Dalgona","Fall Guys"], correct:2, feedback:"Squid Game (2021) 🦑" },
-    ]
-  },
-  {
-    id: 3,
-    name: "Visage pixelé",
-    icon: "👤",
-    color: "#6C3FC8",
-    desc: "Une célébrité se cache derrière les pixels. Démasque-la !",
-    questions: [
-      { type:"pixel", gen:"y", pixelColor:["#1a1a2e","#e94560","#0f3460","#533483"], hint:"Chanteur de R&B, 4 lettres", answers:["Jay-Z","Usher","R. Kelly","Ne-Yo"], correct:1, feedback:"Usher — Yeah!, Confessions… Une carrière de 30 ans, des abdos de 20 ans." },
-      { type:"pixel", gen:"x", pixelColor:["#2d6a4f","#40916c","#74c69d","#d8f3dc"], hint:"Icône du cinéma français, 2 prénoms", answers:["Jean-Paul Belmondo","Alain Delon","Gérard Depardieu","Jean Reno"], correct:1, feedback:"Alain Delon — Le Samouraï, Plein Soleil." },
-      { type:"pixel", gen:"z", pixelColor:["#f72585","#7209b7","#3a0ca3","#4361ee"], hint:"Chanteuse pop, Grammy 2020, initiale B", answers:["Beyoncé","Billie Eilish","Dua Lipa","Ariana Grande"], correct:1, feedback:"Billie Eilish — 18 ans, 4 Grammy. 👑" },
-    ]
-  },
   {
     id: 4,
     name: "Répliques",
@@ -466,20 +596,36 @@ const ROUNDS_MCQ = [
       { type:"quote", gen:"x", quote:"« Hasta la vista, baby. »", answers:["RoboCop","Total Recall","Terminator 2","Predator"], correct:2, feedback:"Terminator 2 (1991)." },
       { type:"quote", gen:"z", quote:"« Je suis le problème, c'est moi. »", answers:["Don't Look Up","Euphoria","Anti-Hero (Taylor Swift)","Black Mirror"], correct:2, feedback:"Anti-Hero de Taylor Swift (2022) — \"It's me, hi, I'm the problem, it's me.\" 🎤" },
     ]
-  }
+  },
 ];
 
 // ── ÉTAT ──────────────────────────────────────────────────────────────────────
 let score = 0;
 let motsDImpro = 0;
-let yearBonusUsed = false; // true si le joueur a raté l'année → plus de bonus pour cette manche
-let musicIndex = 0;        // extrait en cours (0-11)
-let musicDots = [];        // 'pending' | 'correct' | 'wrong'
-let musicAnswered = false;
-let yearPhase = false;     // true quand on affiche le bonus année
+let lastMilestoneMots = 0; // dernier palier de 5 pts atteint pour les mots d'impro
 
-// MCQ (manches 2-4)
-let currentMCQRound = 0;  // index dans ROUNDS_MCQ (0-2)
+// Manche 1
+let yearBonusUsed = false;
+let musicDone = false;
+let musicIndex = 0;
+let musicDots = [];
+let musicAnswered = false;
+let yearPhase = false;
+
+// Manche 2
+let visualsDone = false;
+let visualIndex = 0;
+let visualAnswered = false;
+
+// Manche 3
+let starDone = false;
+let buzzerPressed = false;
+let starImg = null;
+let starBlockSize = 40;
+let starPixelInterval = null;
+
+// Manche 4
+let currentMCQRound = 0;
 let currentMCQQ = 0;
 let timerInterval = null;
 let timeLeft = 10;
@@ -493,24 +639,38 @@ function showScreen(id) {
 }
 
 function startGame() {
-  score = 0; motsDImpro = 0; yearBonusUsed = false;
+  score = 0; motsDImpro = 0; lastMilestoneMots = 0;
+  yearBonusUsed = false; musicDone = false;
   musicIndex = 0; musicDots = Array(SONGS.length).fill('pending');
+  visualsDone = false; visualIndex = 0;
+  starDone = false; buzzerPressed = false;
   currentMCQRound = 0; currentMCQQ = 0;
   showRoundIntro(0);
 }
 
 function restartGame() { startGame(); }
 
+// ── MOTS D'IMPRO : palier tous les 5 pts ──────────────────────────────────────
+function checkMotsMilestone() {
+  const milestone = Math.floor(score / 5);
+  if (milestone > lastMilestoneMots) {
+    const gained = milestone - lastMilestoneMots;
+    motsDImpro += gained;
+    lastMilestoneMots = milestone;
+    return gained;
+  }
+  return 0;
+}
+
 // ── INTRO MANCHE ──────────────────────────────────────────────────────────────
 function showRoundIntro(roundIdx) {
-  // roundIdx: 0 = musiques, 1-3 = MCQ rounds
-  const names  = ["Musiques","Visuels","Visage pixelé","Répliques"];
-  const icons  = ["🎵","🖼️","👤","💬"];
-  const descs  = [
+  const names = ["Musiques","Visuels","Visage pixelé","Répliques"];
+  const icons = ["🎵","🖼️","👤","💬"];
+  const descs = [
     "Un extrait se lance. Écris le titre ou l'artiste. Bonne réponse = 1 point.\nBonus : trouve l'année à ±3 ans → 2 mots d'impro pour la finale !",
+    "8 images s'affichent une par une. Film, Série Télé, Pub ou Jeu Vidéo ? Bonne réponse = 1 point. Tous les 5 pts cumulés = 1 mot d'impro.",
+    "La photo d'une star est pixelisée. Une voix égrène des indices. Buzzez dès que vous pensez savoir — une seule tentative ! Bonne réponse = 1 pt + 🎤 1 mot d'impro.",
     ROUNDS_MCQ[0].desc,
-    ROUNDS_MCQ[1].desc,
-    ROUNDS_MCQ[2].desc,
   ];
   document.getElementById('ri-num').textContent  = `Manche ${roundIdx+1} / 4`;
   document.getElementById('ri-icon').textContent = icons[roundIdx];
@@ -520,14 +680,10 @@ function showRoundIntro(roundIdx) {
 }
 
 function startRound() {
-  // Détermine quelle manche on lance
-  if (musicIndex === 0 && currentMCQRound === 0 && score === 0 && motsDImpro === 0) {
-    // Première manche : musiques
-    startMusicRound();
-  } else if (currentMCQRound < ROUNDS_MCQ.length) {
-    currentMCQQ = 0;
-    showMCQQuestion();
-  }
+  if (!musicDone)        { startMusicRound(); }
+  else if (!visualsDone) { startVisualsRound(); }
+  else if (!starDone)    { startStarRound(); }
+  else if (currentMCQRound < ROUNDS_MCQ.length) { currentMCQQ = 0; showMCQQuestion(); }
 }
 
 // ── MANCHE 1 : MUSIQUES ───────────────────────────────────────────────────────
@@ -718,11 +874,261 @@ function nextMusic() {
   if (musicIndex < SONGS.length) {
     loadMusicExtrait();
   } else {
-    // Fin de la manche musiques → manche 2
-    currentMCQRound = 0;
-    showRoundIntro(1);
+    musicDone = true;
+    document.getElementById('m1-end-score').textContent = score;
+    document.getElementById('m1-end-score-label').textContent = `/ ${SONGS.length} pts`;
+    document.getElementById('m1-end-mots').textContent = `🎤 ${motsDImpro} mot${motsDImpro !== 1 ? 's' : ''}`;
+    showScreen('screen-m1-end');
   }
 }
+
+function goToManche2() { showRoundIntro(1); }
+
+// ── MANCHE 2 : VISUELS ───────────────────────────────────────────────────────
+function startVisualsRound() {
+  visualIndex = 0;
+  visualAnswered = false;
+  loadVisual();
+}
+
+function loadVisual() {
+  visualAnswered = false;
+  const v = VISUALS[visualIndex];
+
+  document.getElementById('m2-progress').style.width = ((visualIndex / VISUALS.length) * 100) + '%';
+  document.getElementById('m2-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
+  document.getElementById('m2-mots').textContent = '🎤 ' + motsDImpro;
+
+  // Dots
+  const dotsEl = document.getElementById('m2-dots');
+  dotsEl.innerHTML = '';
+  VISUALS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'mp-dot' + (i < visualIndex ? ' done' : i === visualIndex ? ' current' : '');
+    dotsEl.appendChild(d);
+  });
+
+  // Image
+  const img = document.getElementById('m2-img');
+  const fallback = document.getElementById('m2-img-fallback');
+  img.style.display = 'block';
+  fallback.style.display = 'none';
+  img.src = 'images/' + v.file;
+  document.getElementById('m2-img-name').textContent = v.file;
+
+  // Boutons
+  document.querySelectorAll('#m2-buttons .ans-btn').forEach(b => {
+    b.className = 'ans-btn';
+    b.disabled = false;
+  });
+
+  // Reset feedback
+  document.getElementById('m2-feedback').className = 'feedback';
+  document.getElementById('m2-feedback').innerHTML = '';
+  document.getElementById('m2-milestone').style.display = 'none';
+
+  showScreen('screen-m2');
+}
+
+function selectVisual(cat) {
+  if (visualAnswered) return;
+  visualAnswered = true;
+  const v = VISUALS[visualIndex];
+  const ok = cat === v.correct;
+
+  // Colorie les boutons
+  document.querySelectorAll('#m2-buttons .ans-btn').forEach(b => {
+    b.disabled = true;
+    const bCat = b.getAttribute('onclick').replace("selectVisual('","").replace("')","");
+    if (bCat === v.correct) b.classList.add('correct');
+    else if (bCat === cat && !ok) b.classList.add('wrong');
+    else b.classList.add('disabled');
+  });
+
+  if (ok) {
+    score++;
+    document.getElementById('m2-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
+    document.getElementById('m2-score').classList.add('pop');
+    setTimeout(() => document.getElementById('m2-score').classList.remove('pop'), 400);
+
+    // Vérif palier mots d'impro
+    const gained = checkMotsMilestone();
+    if (gained > 0) {
+      document.getElementById('m2-mots').textContent = '🎤 ' + motsDImpro;
+      const ms = document.getElementById('m2-milestone');
+      ms.style.display = 'block';
+      ms.innerHTML = `<div class="mots-badge">🎤 +${gained} mot${gained>1?'s':''} d'impro ! (${score} pts cumulés)</div>`;
+    }
+  }
+
+  const fb = document.getElementById('m2-feedback');
+  fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+  fb.innerHTML = `<strong>${ok ? '✅ ' + CAT_LABELS[v.correct] + ' !' : '❌ C\'était : ' + CAT_LABELS[v.correct]}</strong><span style="font-size:.88rem;color:var(--muted);display:block;margin-top:3px">${v.title}</span>`;
+
+  setTimeout(() => nextVisual(), ok ? 3000 : 3500);
+}
+
+function nextVisual() {
+  visualIndex++;
+  if (visualIndex < VISUALS.length) {
+    loadVisual();
+  } else {
+    visualsDone = true;
+    // Genre le plus représenté
+    const counts = {};
+    VISUALS.forEach(v => { counts[v.correct] = (counts[v.correct] || 0) + 1; });
+    const topCat = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+    const catIcons = { film:'🎬', serie:'📺', pub:'📣', 'jeu-video':'🎮' };
+    document.getElementById('m2-end-score').textContent = score;
+    document.getElementById('m2-end-score-label').textContent = `/ ${SONGS.length + VISUALS.length} pts cumulés`;
+    document.getElementById('m2-end-mots').textContent = `🎤 ${motsDImpro} mot${motsDImpro !== 1 ? 's' : ''}`;
+    document.getElementById('m2-end-genre').textContent =
+      `${catIcons[topCat[0]]} Genre dominant : ${CAT_LABELS[topCat[0]]} (${topCat[1]} visuels sur ${VISUALS.length})`;
+    showScreen('screen-m2-end');
+  }
+}
+
+function goToManche3() { showRoundIntro(2); }
+
+// ── MANCHE 3 : VISAGE PIXELÉ ─────────────────────────────────────────────────
+function startStarRound() {
+  starDone = false;
+  buzzerPressed = false;
+  starImg = null;
+  starBlockSize = 40;
+
+  document.getElementById('m3-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
+  document.getElementById('m3-mots').textContent = '🎤 ' + motsDImpro;
+  document.getElementById('m3-buzzer-area').style.display = 'block';
+  document.getElementById('m3-buzzer-btn').disabled = false;
+  document.getElementById('m3-answer-area').style.display = 'none';
+  document.getElementById('m3-feedback').className = 'feedback';
+  document.getElementById('m3-feedback').innerHTML = '';
+  document.getElementById('m3-input').value = '';
+  document.getElementById('m3-track-label').textContent = '🔊 Indices en cours…';
+
+  // Charger et pixeliser la photo
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    starImg = img;
+    drawPixelatedStar(starBlockSize);
+    startPixelRevealStar();
+  };
+  img.onerror = () => {
+    // Fallback : visage abstrait
+    const ctx = document.getElementById('starCanvas').getContext('2d');
+    drawPixelFace(ctx, ['#1a1a2e','#e94560','#0f3460','#533483'], starBlockSize);
+    startPixelRevealStar();
+  };
+  img.src = 'images/' + STAR.photo;
+
+  // Lancer l'audio
+  const audio = document.getElementById('m3-audio');
+  audio.src = 'audio/' + STAR.audio;
+  audio.onended = () => {
+    document.getElementById('m3-track-label').textContent = '🔊 Fin des indices — buzzez !';
+    stopM3Wave();
+  };
+  audio.play().catch(() => {});
+  startM3Wave();
+
+  showScreen('screen-m3');
+}
+
+function drawPixelatedStar(blockSize) {
+  const canvas = document.getElementById('starCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  if (blockSize <= 1) {
+    if (starImg) { ctx.imageSmoothingEnabled = true; ctx.drawImage(starImg, 0, 0, w, h); }
+    return;
+  }
+  if (starImg) {
+    const off = document.createElement('canvas');
+    const sw = Math.max(1, Math.floor(w / blockSize));
+    const sh = Math.max(1, Math.floor(h / blockSize));
+    off.width = sw; off.height = sh;
+    off.getContext('2d').drawImage(starImg, 0, 0, sw, sh);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(off, 0, 0, w, h);
+  } else {
+    drawPixelFace(ctx, ['#1a1a2e','#e94560','#0f3460','#533483'], blockSize);
+  }
+}
+
+function startPixelRevealStar() {
+  stopPixelRevealStar();
+  // Dépixelisation progressive sur la durée de l'audio (env. blockSize 40→1 en ~30 étapes de 1.5s)
+  starPixelInterval = setInterval(() => {
+    starBlockSize = Math.max(1, starBlockSize - 2);
+    drawPixelatedStar(starBlockSize);
+    if (starBlockSize <= 1) stopPixelRevealStar();
+  }, 1500);
+}
+
+function stopPixelRevealStar() {
+  if (starPixelInterval) { clearInterval(starPixelInterval); starPixelInterval = null; }
+}
+
+function startM3Wave() {
+  document.querySelectorAll('#m3-visual .audio-bar').forEach(b => b.style.animationPlayState = 'running');
+}
+function stopM3Wave() {
+  document.querySelectorAll('#m3-visual .audio-bar').forEach(b => b.style.animationPlayState = 'paused');
+}
+
+function pressBuzzer() {
+  if (buzzerPressed) return;
+  buzzerPressed = true;
+  document.getElementById('m3-audio').pause();
+  stopM3Wave();
+  document.getElementById('m3-track-label').textContent = '⏸ Audio pausé — donnez votre réponse';
+  document.getElementById('m3-buzzer-area').style.display = 'none';
+  document.getElementById('m3-answer-area').style.display = 'block';
+  setTimeout(() => document.getElementById('m3-input').focus(), 100);
+}
+
+function validateStarAnswer() {
+  const val = document.getElementById('m3-input').value.trim();
+  if (!val) return;
+
+  stopPixelRevealStar();
+  starBlockSize = 1;
+  drawPixelatedStar(1);  // révèle la photo entière
+
+  const audio = document.getElementById('m3-audio');
+  audio.pause(); audio.currentTime = 0;
+  stopM3Wave();
+
+  const n = norm(val);
+  const ok = STAR.acceptedAnswers.some(a => {
+    const na = norm(a);
+    return na === n || (na.includes(n) && n.length >= 3);
+  });
+
+  if (ok) {
+    score++;
+    motsDImpro++;
+    document.getElementById('m3-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
+    document.getElementById('m3-mots').textContent = '🎤 ' + motsDImpro;
+  }
+
+  starDone = true;
+
+  const fb = document.getElementById('m3-feedback');
+  fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+  fb.innerHTML = ok
+    ? `<strong>✅ ${STAR.name} !</strong><div style="margin-top:6px;font-size:.85rem;color:var(--muted)">+1 pt · 🎤 +1 mot d'impro</div>`
+    : `<strong>❌ C'était ${STAR.name}</strong>`;
+
+  setTimeout(() => {
+    fb.innerHTML += `<div style="margin-top:14px"><button class="btn" onclick="goToManche4()">Manche suivante →</button></div>`;
+  }, 2000);
+}
+
+function goToManche4() { showRoundIntro(3); }
 
 // ── BONUS ANNÉE ───────────────────────────────────────────────────────────────
 function resetYearCardBody() {
@@ -801,9 +1207,8 @@ function showMCQQuestion() {
   });
 
   // Card
-  const genLabels = { x:'Gen X', y:'Gen Y', z:'Gen Z' };
   const card = document.getElementById('q-card');
-  let html = `<div class="gen-tag ${q.gen}">${genLabels[q.gen]}</div>`;
+  let html = ``;
   if (q.type === 'visual') {
     html += `<div class="q-type-tag">🖼️ Identifie cette référence</div>`;
     html += `<div class="q-content">${q.caption}</div>`;
@@ -869,22 +1274,14 @@ function nextMCQ() {
   } else {
     currentMCQRound++;
     if (currentMCQRound < ROUNDS_MCQ.length) {
-      showRoundIntro(currentMCQRound + 1);
+      showRoundIntro(currentMCQRound + 3); // manche 4 = intro index 3
     } else {
       showFinalScore();
     }
   }
 }
 
-// Surcharge startRound pour distinguer le round en cours
-function startRound() {
-  if (currentMCQRound === 0 && musicIndex === 0 && score === 0 && motsDImpro === 0) {
-    startMusicRound();
-  } else if (currentMCQRound < ROUNDS_MCQ.length) {
-    currentMCQQ = 0;
-    showMCQQuestion();
-  }
-}
+// (startRound défini plus haut)
 
 // ── TIMER MCQ ──────────────────────────────────────────────────────────────────
 function startTimer() {
@@ -959,7 +1356,7 @@ function drawPixelFace(ctx, colors, blockSize) {
 
 // ── SCORE FINAL ────────────────────────────────────────────────────────────────
 function showFinalScore() {
-  const total = SONGS.length + ROUNDS_MCQ.reduce((a,r) => a+r.questions.length, 0);
+  const total = SONGS.length + VISUALS.length + 1 + ROUNDS_MCQ.reduce((a,r) => a+r.questions.length, 0);
   document.getElementById('final-score').textContent = score;
   document.getElementById('final-pts-label').textContent = `/ ${total} pts`;
   document.getElementById('final-mots').textContent = `🎤 ${motsDImpro} mot${motsDImpro !== 1 ? 's' : ''} d'impro`;
@@ -975,8 +1372,10 @@ function showFinalScore() {
 }
 
 function startGame() {
-  score = 0; motsDImpro = 0; yearBonusUsed = false;
-  musicIndex = 0; musicDots = Array(SONGS.length).fill('pending');
+  score = 0; motsDImpro = 0; lastMilestoneMots = 0; yearBonusUsed = false;
+  musicDone = false; musicIndex = 0; musicDots = Array(SONGS.length).fill('pending');
+  visualsDone = false; visualIndex = 0;
+  starDone = false; buzzerPressed = false;
   currentMCQRound = 0; currentMCQQ = 0;
   showRoundIntro(0);
 }
