@@ -590,11 +590,50 @@ const ROUNDS_MCQ = [
     name: "Répliques",
     icon: "💬",
     color: "#FF6B35",
-    desc: "Une réplique culte. Retrouve le film ou la série.",
+    desc: "Le début d'une réplique culte s'affiche. Clique sur la bonne fin !",
     questions: [
-      { type:"quote", gen:"y", quote:"« La vie, c'est comme une boîte de chocolats… »", answers:["Philadelphia","Forrest Gump","Cast Away","Big"], correct:1, feedback:"Forrest Gump (1994) — Tom Hanks en fait tellement qu'on oublie que c'est du cinéma. 🏃" },
-      { type:"quote", gen:"x", quote:"« Hasta la vista, baby. »", answers:["RoboCop","Total Recall","Terminator 2","Predator"], correct:2, feedback:"Terminator 2 (1991)." },
-      { type:"quote", gen:"z", quote:"« Je suis le problème, c'est moi. »", answers:["Don't Look Up","Euphoria","Anti-Hero (Taylor Swift)","Black Mirror"], correct:2, feedback:"Anti-Hero de Taylor Swift (2022) — \"It's me, hi, I'm the problem, it's me.\" 🎤" },
+      {
+        type: "quote",
+        debut: "« Vous allez avoir besoin d'un… »",
+        answers: ["…plus grand bateau.", "…meilleur équipement.", "…sacré courage.", "…autre équipage."],
+        correct: 0,
+        feedback: "Les Dents de la mer — une réplique improvisée par Roy Scheider. 🦈"
+      },
+      {
+        type: "quote",
+        debut: "« La vie, c'est comme une boîte de chocolats… »",
+        answers: ["…c'est parfois amer, parfois sucré.", "…on en veut toujours plus.", "…On ne sait jamais sur quoi on va tomber.", "…il faut la croquer à pleines dents."],
+        correct: 2,
+        feedback: "Forrest Gump — Tom Hanks. 🍫"
+      },
+      {
+        type: "quote",
+        debut: "« Je ne suis qu'un… »",
+        answers: ["…fantôme.", "…homme ordinaire.", "…soldat perdu.", "…Jack."],
+        correct: 3,
+        feedback: "King Kong."
+      },
+      {
+        type: "quote",
+        debut: "« Dis bonjour à mon petit… »",
+        answers: ["…frère.", "…ami.", "…copain.", "…chien."],
+        correct: 1,
+        feedback: "Scarface — Al Pacino. \"Say hello to my little friend !\" 🔫"
+      },
+      {
+        type: "quote",
+        debut: "« Houston, on a un… »",
+        answers: ["…décollage.", "…contact.", "…problème.", "…retard."],
+        correct: 2,
+        feedback: "Apollo 13 — \"Houston, we have a problem.\" 🚀"
+      },
+      {
+        type: "quote",
+        debut: "« Là où on va, on n'a pas besoin… »",
+        answers: ["…de carburant.", "…de temps.", "…de route !", "…de vitesse."],
+        correct: 2,
+        feedback: "Retour vers le futur — Doc Brown à Marty McFly. \"Roads? Where we're going, we don't need roads.\" 🚗⚡"
+      },
     ]
   },
 ];
@@ -630,7 +669,7 @@ let currentMCQQ = 0;
 let timerInterval = null;
 let timeLeft = 10;
 let pixelInterval = null;
-const TIMER_SEC = 10;
+const TIMER_SEC = 20;
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function showScreen(id) {
@@ -1091,8 +1130,13 @@ function pressBuzzer() {
 }
 
 function validateStarAnswer() {
+  if (starDone) return;
   const val = document.getElementById('m3-input').value.trim();
   if (!val) return;
+
+  // Verrouille immédiatement — une seule tentative
+  document.getElementById('m3-input').disabled = true;
+  document.getElementById('m3-validate-btn').disabled = true;
 
   stopPixelRevealStar();
   starBlockSize = 1;
@@ -1219,8 +1263,9 @@ function showMCQQuestion() {
     html += `<div class="pixel-wrap"><canvas id="pixelCanvas" width="220" height="220"></canvas><div class="pixel-hint">L'image se précise…</div></div>`;
     setTimeout(() => startPixelReveal(q), 100);
   } else if (q.type === 'quote') {
-    html += `<div class="q-type-tag">💬 D'où vient cette réplique ?</div>`;
-    html += `<div class="q-content"><div class="replique-text">${q.quote}</div></div>`;
+    html += `<div class="q-type-tag">💬 Complète la réplique</div>`;
+    html += `<div class="q-content"><div class="replique-text">${q.debut}</div></div>`;
+    html += `<div style="font-size:.8rem;color:var(--muted);text-align:center;margin-top:6px">Clique sur la bonne fin →</div>`;
   }
   card.innerHTML = html;
 
@@ -1255,6 +1300,11 @@ function selectMCQAnswer(idx, q) {
     document.getElementById('q-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
     document.getElementById('q-score').classList.add('pop');
     setTimeout(() => document.getElementById('q-score').classList.remove('pop'), 400);
+    // Palier mots d'impro (tous les 5 pts cumulés)
+    const gained = checkMotsMilestone();
+    if (gained > 0) {
+      document.getElementById('q-mots').textContent = '🎤 ' + motsDImpro;
+    }
     if (q.type === 'pixel') {
       const c = document.getElementById('pixelCanvas');
       if (c) drawPixelFace(c.getContext('2d'), q.pixelColor, 1);
@@ -1263,7 +1313,7 @@ function selectMCQAnswer(idx, q) {
   const fb = document.getElementById('feedback');
   fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
   fb.innerHTML = `<strong>${ok ? '✅ Bonne réponse !' : '❌ Raté...'}</strong>${q.feedback}`;
-  setTimeout(() => nextMCQ(), 2600);
+  setTimeout(() => nextMCQ(), 5000);
 }
 
 function nextMCQ() {
@@ -1312,7 +1362,7 @@ function startTimer() {
       const fb = document.getElementById('feedback');
       fb.className = 'feedback show wrong';
       fb.innerHTML = `<strong>⏱️ Temps écoulé !</strong>${q.feedback}`;
-      setTimeout(() => nextMCQ(), 2600);
+      setTimeout(() => nextMCQ(), 5000);
     }
   }, 1000);
 }
