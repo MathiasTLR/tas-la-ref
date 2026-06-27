@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>T'as la réf ?</title>
+<style>
+  :root {
+    --yellow: #FFD600;
+    --orange: #FF6B35;
+    --purple: #6C3FC8;
+    --blue: #1E90FF;
+    --dark: #111827;
+    --card: #1F2937;
+    --text: #F9FAFB;
+    --muted: #9CA3AF;
+    --green: #22C55E;
+    --red: #EF4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .screen { display: none; width: 100%; max-width: 480px; padding: 24px 20px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  /* === ACCUEIL === */
+  .logo { font-size: 3.5rem; margin-bottom: 8px; }
+  .title { font-size: 2rem; font-weight: 900; letter-spacing: -1px; text-align: center; line-height: 1.1; }
+  .title span { color: var(--yellow); }
+  .subtitle { color: var(--muted); margin: 10px 0 32px; text-align: center; font-size: 0.95rem; }
+  .btn {
+    display: inline-block; width: 100%;
+    background: var(--yellow); color: var(--dark);
+    font-size: 1.1rem; font-weight: 800;
+    border: none; border-radius: 16px;
+    padding: 18px 24px; cursor: pointer;
+    transition: transform .15s, opacity .15s;
+    text-align: center;
+  }
+  .btn:active { transform: scale(.97); opacity: .9; }
+  .btn.secondary { background: var(--card); color: var(--text); margin-top: 10px; font-weight: 600; }
+  .round-preview { width: 100%; margin: 28px 0 24px; display: flex; flex-direction: column; gap: 10px; }
+  .rp-item { background: var(--card); border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
+  .rp-icon { font-size: 1.8rem; width: 44px; text-align: center; }
+  .rp-text h3 { font-size: .95rem; font-weight: 700; }
+  .rp-text p { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+  .rp-num { margin-left: auto; font-size: .75rem; font-weight: 700; background: rgba(255,255,255,.08); padding: 4px 8px; border-radius: 8px; color: var(--muted); }
+
+  /* === TRANSITION MANCHE === */
+  .round-intro { text-align: center; }
+  .ri-num { font-size: .85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+  .ri-icon { font-size: 5rem; margin: 12px 0; }
+  .ri-name { font-size: 1.8rem; font-weight: 900; }
+  .ri-desc { color: var(--muted); margin: 10px 0 32px; font-size: .9rem; line-height: 1.5; }
+  .ri-gen { display: flex; gap: 8px; justify-content: center; margin: 12px 0 24px; }
+  .gen-badge {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: .8rem; font-weight: 700;
+    border: 2px solid transparent;
+  }
+  .gen-badge.x { background: rgba(108,63,200,.2); color: #A78BFA; border-color: #6C3FC8; }
+  .gen-badge.y { background: rgba(30,144,255,.2); color: #60A5FA; border-color: #1E90FF; }
+  .gen-badge.z { background: rgba(255,107,53,.2); color: #FB923C; border-color: #FF6B35; }
+
+  /* === QUESTION === */
+  .q-header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .q-progress-wrap { flex: 1; height: 6px; background: rgba(255,255,255,.1); border-radius: 4px; margin: 0 12px; }
+  .q-progress { height: 100%; border-radius: 4px; background: var(--yellow); transition: width .3s; }
+  .q-round-label { font-size: .75rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .q-score { font-size: .9rem; font-weight: 800; color: var(--yellow); }
+
+  /* Timer */
+  .timer-ring { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle { fill: none; stroke-width: 5; }
+  .timer-bg { stroke: rgba(255,255,255,.1); }
+  .timer-fg { stroke: var(--yellow); stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s; }
+  .timer-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; }
+
+  /* Carte question */
+  .q-card { width: 100%; background: var(--card); border-radius: 20px; padding: 22px; margin: 12px 0 18px; }
+  .q-type-tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+  .q-content { font-size: 1.05rem; font-weight: 600; line-height: 1.5; }
+  .q-content.big { font-size: 1.3rem; }
+
+  /* Indices musique */
+  .clue-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .clue { background: rgba(255,255,255,.05); border-radius: 10px; padding: 10px 14px; font-size: .88rem; }
+  .clue.hidden { opacity: .25; filter: blur(4px); user-select: none; }
+  .clue-label { font-size: .7rem; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+
+  /* Visuel */
+  .q-image { width: 100%; border-radius: 14px; overflow: hidden; margin-top: 12px; aspect-ratio: 4/3; }
+  .q-image img { width: 100%; height: 100%; object-fit: cover; }
+  .q-image.emoji-art {
+    display: flex; align-items: center; justify-content: center;
+    background: #0F172A; font-size: 6rem;
+    letter-spacing: 4px;
+  }
+
+  /* Pixel face */
+  .pixel-wrap { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  canvas#pixelCanvas { border-radius: 14px; image-rendering: pixelated; width: 220px; height: 220px; }
+  .pixel-hint { font-size: .8rem; color: var(--muted); }
+
+  /* Réplique */
+  .replique-text { font-size: 1.2rem; font-style: italic; line-height: 1.6; position: relative; padding: 0 12px; }
+  .replique-text::before { content: '"'; font-size: 3rem; color: var(--yellow); position: absolute; left: -8px; top: -10px; line-height: 1; font-style: normal; }
+
+  /* Answers */
+  .answers { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ans-btn {
+    background: var(--card); border: 2px solid rgba(255,255,255,.08);
+    border-radius: 14px; padding: 14px 12px;
+    font-size: .9rem; font-weight: 600; color: var(--text);
+    cursor: pointer; text-align: center; line-height: 1.3;
+    transition: border-color .15s, background .15s, transform .1s;
+  }
+  .ans-btn:active { transform: scale(.97); }
+  .ans-btn:hover { border-color: rgba(255,255,255,.2); }
+  .ans-btn.correct { background: rgba(34,197,94,.2); border-color: var(--green); color: var(--green); }
+  .ans-btn.wrong { background: rgba(239,68,68,.15); border-color: var(--red); color: var(--red); }
+  .ans-btn.disabled { pointer-events: none; opacity: .5; }
+
+  /* Feedback */
+  .feedback { width: 100%; margin-top: 14px; padding: 14px 16px; border-radius: 14px; font-size: .9rem; line-height: 1.5; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: rgba(34,197,94,.15); border: 1.5px solid var(--green); }
+  .feedback.wrong { background: rgba(239,68,68,.1); border: 1.5px solid var(--red); }
+  .feedback strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+
+  /* Génération tag sur question */
+  .gen-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+  .gen-tag.x { background: rgba(108,63,200,.25); color: #A78BFA; }
+  .gen-tag.y { background: rgba(30,144,255,.25); color: #60A5FA; }
+  .gen-tag.z { background: rgba(255,107,53,.25); color: #FB923C; }
+
+  /* === SCORES FINAUX === */
+  .score-screen { text-align: center; }
+  .score-big { font-size: 5rem; font-weight: 900; color: var(--yellow); line-height: 1; }
+  .score-label { font-size: 1rem; color: var(--muted); margin: 6px 0 24px; }
+  .gen-scores { width: 100%; display: flex; flex-direction: column; gap: 10px; margin: 0 0 28px; }
+  .gs-item { background: var(--card); border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+  .gs-name { font-weight: 700; flex: 1; }
+  .gs-bar-wrap { flex: 2; height: 8px; background: rgba(255,255,255,.1); border-radius: 4px; }
+  .gs-bar { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .gs-pts { font-weight: 800; font-size: .95rem; min-width: 40px; text-align: right; }
+  .verdict { font-size: 1.5rem; font-weight: 800; margin: 16px 0 8px; }
+  .verdict-sub { color: var(--muted); font-size: .9rem; margin-bottom: 28px; }
+
+  /* Bonus animation */
+  @keyframes pop { 0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)} }
+  .pop { animation: pop .35s ease-out; }
+
+  /* Anim entrée screen */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+  .screen.active { animation: fadeUp .3s ease-out; }
+
+  /* Barre de progression manche */
+  .manche-progress { width: 100%; display: flex; gap: 6px; margin-bottom: 20px; }
+  .mp-dot { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); transition: background .3s; }
+  .mp-dot.done { background: var(--yellow); }
+  .mp-dot.current { background: rgba(255,214,0,.5); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- ÉCRAN ACCUEIL -->
+<!-- ============================================================ -->
+<div id="screen-home" class="screen active">
+  <div class="logo">🎬</div>
+  <h1 class="title">T'as la <span>réf</span> ?</h1>
+  <p class="subtitle">4 manches, 12 questions, 0 excuse</p>
+  <div class="round-preview">
+    <div class="rp-item">
+      <div class="rp-icon">🎵</div>
+      <div class="rp-text"><h3>Musiques</h3><p>Retrouve la chanson à partir des indices</p></div>
+      <div class="rp-num">M1</div>
+    </div>
+    <div class="rp-item">
+      <div class="rp-icon">🖼️</div>
+      <div class="rp-text"><h3>Visuels</h3><p>Identifie la référence culturelle</p></div>
+      <div class="rp-num">M2</div>
+    </div>
+    <div class="rp-item">
+      <div class="rp-icon">👤</div>
+      <div class="rp-text"><h3>Visage pixelé</h3><p>Qui se cache derrière les pixels ?</p></div>
+      <div class="rp-num">M3</div>
+    </div>
+    <div class="rp-item">
+      <div class="rp-icon">💬</div>
+      <div class="rp-text"><h3>Répliques</h3><p>De quel film ou série vient cette phrase ?</p></div>
+      <div class="rp-num">M4</div>
+    </div>
+  </div>
+  <button class="btn" onclick="startGame()">C'est parti !</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- INTRO MANCHE -->
+<!-- ============================================================ -->
+<div id="screen-round-intro" class="screen">
+  <div class="round-intro">
+    <div class="ri-num" id="ri-num">Manche 1 / 4</div>
+    <div class="ri-icon" id="ri-icon">🎵</div>
+    <div class="ri-name" id="ri-name">Musiques</div>
+    <div class="ri-desc" id="ri-desc">Retrouve la chanson à partir d'indices progressifs.</div>
+    <div class="ri-gen">
+      <div class="gen-badge x">Gen X</div>
+      <div class="gen-badge y">Gen Y</div>
+      <div class="gen-badge z">Gen Z</div>
+    </div>
+    <button class="btn" onclick="startRound()">Commencer la manche</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- QUESTION -->
+<!-- ============================================================ -->
+<div id="screen-question" class="screen">
+  <!-- Header -->
+  <div class="q-header">
+    <span class="q-round-label" id="q-round-label">M1 – Musiques</span>
+    <div class="q-progress-wrap"><div class="q-progress" id="q-progress" style="width:33%"></div></div>
+    <span class="q-score" id="q-score">0 pts</span>
+  </div>
+  <!-- Timer -->
+  <div class="timer-ring">
+    <svg width="60" height="60" viewBox="0 0 60 60">
+      <circle class="timer-bg" cx="30" cy="30" r="27"/>
+      <circle class="timer-fg" id="timer-fg" cx="30" cy="30" r="27"
+        stroke-dasharray="169.6" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-val" id="timer-val">10</div>
+  </div>
+  <!-- Manche progress dots -->
+  <div class="manche-progress" id="manche-progress"></div>
+  <!-- Question card -->
+  <div class="q-card" id="q-card"></div>
+  <!-- Réponses -->
+  <div class="answers" id="answers"></div>
+  <!-- Feedback -->
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCORE FINAL -->
+<!-- ============================================================ -->
+<div id="screen-score" class="screen">
+  <div class="score-screen">
+    <div style="font-size:1rem;color:var(--muted);margin-bottom:8px;">TON SCORE</div>
+    <div class="score-big" id="final-score">0</div>
+    <div class="score-label" id="final-max">/ 1200 pts</div>
+    <div class="verdict" id="verdict">🎉</div>
+    <div class="verdict-sub" id="verdict-sub"></div>
+    <div class="gen-scores" id="gen-scores"></div>
+    <button class="btn" onclick="restartGame()">Rejouer</button>
+    <button class="btn secondary" onclick="showScreen('screen-home')">Accueil</button>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// DONNÉES DU JEU
+// ================================================================
+const ROUNDS = [
+  {
+    id: 1,
+    name: "Musiques",
+    icon: "🎵",
+    color: "#FFD600",
+    desc: "À partir d'indices progressifs, retrouve la chanson.",
+    questions: [
+      {
+        type: "music",
+        gen: "y",
+        clues: [
+          { label: "Année", text: "1997" },
+          { label: "Indice 1", text: "Un duo franco-américain" },
+          { label: "Indice 2", text: "\"Da ba dee, da ba daa...\"" },
+        ],
+        reveal: "Blue — Eiffel 65",
+        answers: ["Blue — Eiffel 65", "Barbie Girl — Aqua", "Freed from Desire — Gala", "Rhythm of the Night — Corona"],
+        correct: 0,
+        feedback: "Blue (Da Ba Dee) d'Eiffel 65 (1998, pas 1997... on t'a légèrement induit en erreur 😈)."
+      },
+      {
+        type: "music",
+        gen: "x",
+        clues: [
+          { label: "Année", text: "1984" },
+          { label: "Indice 1", text: "La pop star de Détroit" },
+          { label: "Indice 2", text: "\"Papa don't ___\"" },
+        ],
+        reveal: "Papa Don't Preach — Madonna",
+        answers: ["Like a Virgin — Madonna", "Papa Don't Preach — Madonna", "Girls Just Want to Have Fun — Cyndi Lauper", "Material Girl — Madonna"],
+        correct: 1,
+        feedback: "Papa Don't Preach sorti en 1986, pas 1984. Les indices mentent parfois aussi dans l'émission. 😅"
+      },
+      {
+        type: "music",
+        gen: "z",
+        clues: [
+          { label: "Année", text: "2019" },
+          { label: "Indice 1", text: "Un artiste canadien de 17 ans à ses débuts" },
+          { label: "Indice 2", text: "\"Baby Shark\" du rap" },
+        ],
+        reveal: "Old Town Road — Lil Nas X",
+        answers: ["Rockstar — Post Malone", "Old Town Road — Lil Nas X", "Blinding Lights — The Weeknd", "Sunflower — Post Malone"],
+        correct: 1,
+        feedback: "Old Town Road a battu le record du hit le plus long en tête du Billboard Hot 100 : 19 semaines !"
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Visuels",
+    icon: "🖼️",
+    color: "#1E90FF",
+    desc: "Identifie la référence culturelle cachée dans l'image.",
+    questions: [
+      {
+        type: "visual",
+        gen: "y",
+        emoji: "💿🎤🕶️",
+        caption: "Icône des années 90 sur scène",
+        answers: ["Britney Spears", "Backstreet Boys", "Spice Girls", "Destiny's Child"],
+        correct: 2,
+        feedback: "Wannabe (1996), l'hymne féministe le plus chantonné dans les cours de récré. Zigga zig ah 🤌"
+      },
+      {
+        type: "visual",
+        gen: "x",
+        emoji: "👨‍🦲🔫🕶️",
+        caption: "Agent spécial, permis de tuer",
+        answers: ["Mission Impossible", "James Bond — GoldenEye", "Die Hard", "The Matrix"],
+        correct: 1,
+        feedback: "GoldenEye (1995), premier Bond pour Pierce Brosnan — et LE jeu N64 de toute une génération."
+      },
+      {
+        type: "visual",
+        gen: "z",
+        emoji: "🦑🎮🟩",
+        caption: "Jeu de survie coréen devenu phénomène mondial",
+        answers: ["Among Us", "Fortnite Battle Royale", "Squid Game — Dalgona", "Fall Guys"],
+        correct: 2,
+        feedback: "Squid Game (2021) — la série Netflix qui a mis le ddakji et le dalgona sur toutes les lèvres."
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Visage pixelé",
+    icon: "👤",
+    color: "#6C3FC8",
+    desc: "Une célébrité se cache derrière les pixels. Démasque-la avant le temps !",
+    questions: [
+      {
+        type: "pixel",
+        gen: "y",
+        pixelColor: ["#1a1a2e","#e94560","#0f3460","#533483"],
+        pixelName: "CÉLÉBRITÉ A",
+        hint: "Chanteur de R&B, 4 lettres",
+        answers: ["Jay-Z", "Usher", "R. Kelly", "Ne-Yo"],
+        correct: 1,
+        feedback: "Usher — My Way, Yeah!, Confessions... Une carrière de 30 ans, des abdos de 20 ans."
+      },
+      {
+        type: "pixel",
+        gen: "x",
+        pixelColor: ["#2d6a4f","#40916c","#74c69d","#d8f3dc"],
+        pixelName: "CÉLÉBRITÉ B",
+        hint: "Icône du cinéma français, 2 prénoms",
+        answers: ["Jean-Paul Belmondo", "Alain Delon", "Gérard Depardieu", "Jean Reno"],
+        correct: 1,
+        feedback: "Alain Delon — Le Samouraï, Plein Soleil... Le visage du cinéma français des 60-80s."
+      },
+      {
+        type: "pixel",
+        gen: "z",
+        pixelColor: ["#f72585","#7209b7","#3a0ca3","#4361ee"],
+        pixelName: "CÉLÉBRITÉ C",
+        hint: "Chanteuse pop, Grammy 2020, première lettre : B",
+        answers: ["Beyoncé", "Billie Eilish", "Dua Lipa", "Ariana Grande"],
+        correct: 1,
+        feedback: "Billie Eilish — à 18 ans, elle devient la plus jeune artiste à remporter les 4 grandes catégories des Grammy. 👑"
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: "Répliques",
+    icon: "💬",
+    color: "#FF6B35",
+    desc: "Une réplique culte. Identifie le film ou la série.",
+    questions: [
+      {
+        type: "quote",
+        gen: "y",
+        quote: "« La vie, c'est comme une boîte de chocolats... on ne sait jamais sur quoi on va tomber. »",
+        answers: ["Philadelphia", "Forrest Gump", "Cast Away", "Big"],
+        correct: 1,
+        feedback: "Forrest Gump (1994) — Tom Hanks en fait tellement qu'on oublie que c'est du cinéma. 🏃"
+      },
+      {
+        type: "quote",
+        gen: "x",
+        quote: "« Hasta la vista, baby. »",
+        answers: ["RoboCop", "Total Recall", "Terminator 2", "Predator"],
+        correct: 2,
+        feedback: "Terminator 2 (1991) — la plus courte des répliques cultes, la plus longue des carrières."
+      },
+      {
+        type: "quote",
+        gen: "z",
+        quote: "« On est dans une simulation et le mec qui l'a codée était clairement en burn-out. »",
+        answers: ["Don't Look Up", "Black Mirror — Nosedive", "Upload", "The Circle"],
+        correct: 0,
+        feedback: "Don't Look Up (2021) — Adam McKay filme l'absurdité du monde moderne avec une précision chirurgicale et un cynisme délicieux."
+      }
+    ]
+  }
+];
+
+// ================================================================
+// ÉTAT DU JEU
+// ================================================================
+let currentRound = 0;
+let currentQuestion = 0;
+let score = 0;
+let genScores = { x: 0, y: 0, z: 0 };
+let timerInterval = null;
+let timeLeft = 10;
+let answered = false;
+let pixelInterval = null;
+let pixelStep = 0;
+
+const MAX_PTS_PER_Q = 100;
+const TIMER_SEC = 10;
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  currentRound = 0;
+  currentQuestion = 0;
+  score = 0;
+  genScores = { x: 0, y: 0, z: 0 };
+  showRoundIntro();
+}
+
+function showRoundIntro() {
+  const r = ROUNDS[currentRound];
+  document.getElementById('ri-num').textContent = `Manche ${r.id} / 4`;
+  document.getElementById('ri-icon').textContent = r.icon;
+  document.getElementById('ri-name').textContent = r.name;
+  document.getElementById('ri-desc').textContent = r.desc;
+  showScreen('screen-round-intro');
+}
+
+function startRound() {
+  currentQuestion = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  const r = ROUNDS[currentRound];
+  const q = r.questions[currentQuestion];
+  answered = false;
+
+  // Header
+  document.getElementById('q-round-label').textContent = `M${r.id} – ${r.name}`;
+  document.getElementById('q-score').textContent = score + ' pts';
+
+  // Progress bar
+  const totalQ = ROUNDS.reduce((a, rr) => a + rr.questions.length, 0);
+  const doneQ = ROUNDS.slice(0, currentRound).reduce((a, rr) => a + rr.questions.length, 0) + currentQuestion;
+  document.getElementById('q-progress').style.width = ((doneQ / totalQ) * 100) + '%';
+
+  // Manche dots
+  const dots = document.getElementById('manche-progress');
+  dots.innerHTML = '';
+  r.questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'mp-dot' + (i < currentQuestion ? ' done' : i === currentQuestion ? ' current' : '');
+    dots.appendChild(d);
+  });
+
+  // Carte question
+  buildQuestionCard(q, r);
+
+  // Réponses
+  buildAnswers(q, r);
+
+  // Feedback reset
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+
+  // Timer
+  startTimer(q);
+
+  showScreen('screen-question');
+}
+
+// ================================================================
+// QUESTION CARD
+// ================================================================
+function buildQuestionCard(q, r) {
+  const card = document.getElementById('q-card');
+  const genLabels = { x: 'Gen X', y: 'Gen Y', z: 'Gen Z' };
+
+  let html = `<div class="gen-tag ${q.gen}">${genLabels[q.gen]}</div>`;
+
+  if (q.type === 'music') {
+    html += `<div class="q-type-tag">🎵 Quelle est cette chanson ?</div>`;
+    html += `<div class="clue-steps">`;
+    q.clues.forEach((c, i) => {
+      html += `<div class="clue" id="clue-${i}">
+        <div class="clue-label">${c.label}</div>
+        <div>${c.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+    // Reveal clues progressively
+    setTimeout(() => revealClues(q.clues.length), 100);
+  }
+
+  else if (q.type === 'visual') {
+    html += `<div class="q-type-tag">🖼️ Identifie cette référence</div>`;
+    html += `<div class="q-content">${q.caption}</div>`;
+    html += `<div class="q-image emoji-art">${q.emoji}</div>`;
+  }
+
+  else if (q.type === 'pixel') {
+    html += `<div class="q-type-tag">👤 Qui est cette célébrité ?</div>`;
+    html += `<div class="q-content">${q.hint}</div>`;
+    html += `<div class="pixel-wrap">
+      <canvas id="pixelCanvas" width="220" height="220"></canvas>
+      <div class="pixel-hint">L'image se précise avec le temps…</div>
+    </div>`;
+    setTimeout(() => startPixelReveal(q), 100);
+  }
+
+  else if (q.type === 'quote') {
+    html += `<div class="q-type-tag">💬 D'où vient cette réplique ?</div>`;
+    html += `<div class="q-content"><div class="replique-text">${q.quote}</div></div>`;
+  }
+
+  card.innerHTML = html;
+}
+
+// ================================================================
+// INDICES MUSIQUE — révélation progressive
+// ================================================================
+function revealClues(total) {
+  for (let i = 0; i < total; i++) {
+    const el = document.getElementById(`clue-${i}`);
+    if (el) {
+      if (i === 0) el.classList.remove('hidden');
+      else {
+        el.classList.add('hidden');
+        setTimeout(() => el.classList.remove('hidden'), i * 2500);
+      }
+    }
+  }
+}
+
+// ================================================================
+// PIXEL REVEAL — dessin canvas
+// ================================================================
+function startPixelReveal(q) {
+  if (pixelInterval) clearInterval(pixelInterval);
+  const canvas = document.getElementById('pixelCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  pixelStep = 40; // commence très pixelisé
+
+  drawPixelFace(ctx, q.pixelColor, pixelStep);
+
+  pixelInterval = setInterval(() => {
+    if (pixelStep > 1) {
+      pixelStep = Math.max(1, pixelStep - 4);
+      drawPixelFace(ctx, q.pixelColor, pixelStep);
+    } else {
+      clearInterval(pixelInterval);
+    }
+  }, 900);
+}
+
+function drawPixelFace(ctx, colors, blockSize) {
+  const W = 220, H = 220;
+  // Génère un "visage" abstrait stylisé (placeholder)
+  const seed = colors[0].charCodeAt(1); // pseudo-random basé sur la couleur
+
+  for (let y = 0; y < H; y += blockSize) {
+    for (let x = 0; x < W; x += blockSize) {
+      const cx = x / W, cy = y / H;
+
+      // Fond
+      let c = colors[0];
+      // Silhouette tête (ellipse)
+      const dx = cx - .5, dy = cy - .48;
+      if (dx*dx/(.14) + dy*dy/(.18) < 1) c = colors[1];
+      // "Yeux"
+      if (Math.abs(dx + .14) < .07 && Math.abs(dy + .06) < .05) c = colors[3];
+      if (Math.abs(dx - .14) < .07 && Math.abs(dy + .06) < .05) c = colors[3];
+      // Nez
+      if (Math.abs(dx) < .04 && Math.abs(dy - .04) < .06) c = colors[2];
+      // Bouche
+      if (Math.abs(dx) < .12 && Math.abs(dy - .14) < .03) c = colors[3];
+      // Cheveux
+      if (dx*dx/(.14) + dy*dy/(.18) < 1 && dy < -.22) c = colors[3];
+      // Ombre/fond cou
+      if (Math.abs(dx) < .07 && dy > .28 && dy < .42) c = colors[2];
+
+      ctx.fillStyle = c;
+      ctx.fillRect(x, y, blockSize, blockSize);
+    }
+  }
+}
+
+function stopPixelReveal() {
+  if (pixelInterval) { clearInterval(pixelInterval); pixelInterval = null; }
+}
+
+// ================================================================
+// RÉPONSES
+// ================================================================
+function buildAnswers(q, r) {
+  const container = document.getElementById('answers');
+  container.innerHTML = '';
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = a;
+    btn.onclick = () => selectAnswer(i, q, r);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx, q, r) {
+  if (answered) return;
+  answered = true;
+  stopTimer();
+  stopPixelReveal();
+
+  const btns = document.querySelectorAll('.ans-btn');
+  const isCorrect = idx === q.correct;
+
+  btns.forEach((b, i) => {
+    b.classList.add('disabled');
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === idx && !isCorrect) b.classList.add('wrong');
+  });
+
+  // Score
+  if (isCorrect) {
+    const pts = Math.ceil((timeLeft / TIMER_SEC) * MAX_PTS_PER_Q);
+    score += pts;
+    genScores[q.gen] = (genScores[q.gen] || 0) + pts;
+    document.getElementById('q-score').textContent = score + ' pts';
+    document.getElementById('q-score').classList.add('pop');
+    setTimeout(() => document.getElementById('q-score').classList.remove('pop'), 400);
+  }
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (isCorrect ? 'correct' : 'wrong');
+  fb.innerHTML = `<strong>${isCorrect ? '✅ Bonne réponse !' : '❌ Raté...'}</strong>${q.feedback}`;
+
+  // Suivi (pixel révèle complètement si correct)
+  if (isCorrect && q.type === 'pixel') {
+    const canvas = document.getElementById('pixelCanvas');
+    if (canvas) drawPixelFace(canvas.getContext('2d'), q.pixelColor, 1);
+  }
+
+  // Suite
+  setTimeout(() => nextQuestion(r), 2800);
+}
+
+// ================================================================
+// TIMER
+// ================================================================
+function startTimer(q) {
+  stopTimer();
+  timeLeft = TIMER_SEC;
+  const circ = 2 * Math.PI * 27; // 169.6
+  const fg = document.getElementById('timer-fg');
+  const val = document.getElementById('timer-val');
+
+  const update = () => {
+    const pct = timeLeft / TIMER_SEC;
+    fg.style.strokeDashoffset = circ * (1 - pct);
+    val.textContent = timeLeft;
+    if (pct < .4) fg.style.stroke = '#EF4444';
+    else if (pct < .7) fg.style.stroke = '#F97316';
+    else fg.style.stroke = '#FFD600';
+  };
+  update();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    update();
+    if (timeLeft <= 0) {
+      stopTimer();
+      if (!answered) timeUp(ROUNDS[currentRound].questions[currentQuestion], ROUNDS[currentRound]);
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function timeUp(q, r) {
+  answered = true;
+  stopPixelReveal();
+  const btns = document.querySelectorAll('.ans-btn');
+  btns.forEach((b, i) => {
+    b.classList.add('disabled');
+    if (i === q.correct) b.classList.add('correct');
+  });
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show wrong';
+  fb.innerHTML = `<strong>⏱️ Temps écoulé !</strong>${q.feedback}`;
+  setTimeout(() => nextQuestion(r), 2800);
+}
+
+// ================================================================
+// NAVIGATION QUESTIONS / MANCHES
+// ================================================================
+function nextQuestion(r) {
+  currentQuestion++;
+  if (currentQuestion < r.questions.length) {
+    showQuestion();
+  } else {
+    currentRound++;
+    if (currentRound < ROUNDS.length) {
+      showRoundIntro();
+    } else {
+      showFinalScore();
+    }
+  }
+}
+
+// ================================================================
+// SCORE FINAL
+// ================================================================
+function showFinalScore() {
+  const total = ROUNDS.reduce((a, r) => a + r.questions.length, 0) * MAX_PTS_PER_Q;
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('final-max').textContent = `/ ${total} pts`;
+
+  const pct = score / total;
+  let verdict, sub;
+  if (pct >= .9)      { verdict = '🏆 Référence absolue !'; sub = "Tu maîtrises 3 générations de pop culture. Respect."; }
+  else if (pct >= .7) { verdict = '🎯 T\'as bien la réf !'; sub = "Quelques lacunes, mais l'essentiel est là."; }
+  else if (pct >= .5) { verdict = '📼 Quelques trous…'; sub = "Tu gagnerais à revoir quelques classiques."; }
+  else                { verdict = '😅 La réf, c\'est pas toi'; sub = "Heureusement, Netflix est là pour combler les lacunes."; }
+
+  document.getElementById('verdict').textContent = verdict;
+  document.getElementById('verdict-sub').textContent = sub;
+
+  // Gen scores
+  const genLabels = { x: 'Gen X', y: 'Gen Y', z: 'Gen Z' };
+  const genColors = { x: '#A78BFA', y: '#60A5FA', z: '#FB923C' };
+  const maxPerGen = ROUNDS.reduce((a, r) => {
+    r.questions.forEach(q => { a[q.gen] = (a[q.gen] || 0) + MAX_PTS_PER_Q; });
+    return a;
+  }, {});
+
+  const gs = document.getElementById('gen-scores');
+  gs.innerHTML = '';
+  ['x','y','z'].forEach(g => {
+    const pts = genScores[g] || 0;
+    const max = maxPerGen[g] || 300;
+    const pctg = Math.round((pts / max) * 100);
+    gs.innerHTML += `<div class="gs-item">
+      <div class="gs-name" style="color:${genColors[g]}">${genLabels[g]}</div>
+      <div class="gs-bar-wrap"><div class="gs-bar" id="bar-${g}" style="background:${genColors[g]};width:0%"></div></div>
+      <div class="gs-pts" style="color:${genColors[g]}">${pts}</div>
+    </div>`;
+  });
+
+  showScreen('screen-score');
+  setTimeout(() => {
+    ['x','y','z'].forEach(g => {
+      const max = maxPerGen[g] || 300;
+      const pts = genScores[g] || 0;
+      document.getElementById(`bar-${g}`).style.width = ((pts / max) * 100) + '%';
+    });
+  }, 300);
+}
+
+function restartGame() { startGame(); }
+</script>
+</body>
+</html>
