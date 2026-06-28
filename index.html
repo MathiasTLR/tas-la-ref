@@ -255,6 +255,7 @@
   .verdict { font-size: 1.4rem; font-weight: 800; margin: 12px 0 6px; }
   .verdict-sub { color: var(--muted); font-size: .88rem; margin-bottom: 28px; }
 </style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
 
@@ -287,7 +288,7 @@
       <div class="rp-num">M4</div>
     </div>
   </div>
-  <button class="btn" onclick="startGame()">C'est parti !</button>
+  <button class="btn" onclick="showMPMode()">C'est parti !</button>
 </div>
 
 <!-- ============================================================ -->
@@ -352,11 +353,12 @@
     <div style="font-size:4rem;margin-bottom:4px">🎵</div>
     <div style="font-size:3rem;font-weight:900;color:var(--yellow);line-height:1" id="m1-end-score">0</div>
     <div style="font-size:.95rem;color:var(--muted);margin-bottom:20px" id="m1-end-score-label">/ 4 pts</div>
-    <div style="background:rgba(108,63,200,.15);border:1.5px solid var(--purple);border-radius:16px;padding:18px;margin-bottom:28px">
+    <div style="background:rgba(108,63,200,.15);border:1.5px solid var(--purple);border-radius:16px;padding:18px;margin-bottom:16px">
       <div style="font-size:.8rem;color:#A78BFA;font-weight:700;margin-bottom:4px">MOTS D'IMPRO GAGNÉS</div>
       <div style="font-size:2rem;font-weight:900;color:#A78BFA" id="m1-end-mots">🎤 0</div>
       <div style="font-size:.8rem;color:var(--muted);margin-top:4px">utilisables en finale</div>
     </div>
+    <div id="m1-end-year" style="display:none;background:rgba(255,200,0,.08);border:1.5px solid var(--yellow);border-radius:12px;padding:12px 16px;margin-bottom:28px;font-size:.95rem;color:var(--yellow);font-weight:600"></div>
     <button class="btn" onclick="goToManche2()">Manche suivante →</button>
   </div>
 </div>
@@ -550,6 +552,104 @@
     <button class="btn secondary" onclick="showScreen('screen-home')">Accueil</button>
   </div>
 </div>
+
+<!-- ============================================================ -->
+<!-- MULTIJOUEUR : ÉCRANS -->
+<!-- ============================================================ -->
+
+<!-- MP: Choix du mode -->
+<div id="screen-mp-mode" class="screen">
+  <div class="logo">🎮</div>
+  <h1 class="title">Mode de jeu</h1>
+  <p class="subtitle" style="margin-bottom:28px">Comment voulez-vous jouer ?</p>
+  <button class="btn" onclick="startSolo()" style="margin-bottom:12px">🎯 Solo</button>
+  <button class="btn secondary" onclick="showScreen('screen-mp-setup')" style="margin-bottom:12px">🏠 Créer une salle (2–4 joueurs)</button>
+  <button class="btn secondary" onclick="showScreen('screen-mp-join')">🔗 Rejoindre une salle</button>
+  <button class="btn ghost" onclick="showScreen('screen-home')" style="margin-top:12px;width:auto;padding:14px 28px">← Retour</button>
+</div>
+
+<!-- MP: Setup hôte -->
+<div id="screen-mp-setup" class="screen">
+  <div class="logo">🏠</div>
+  <h2 style="margin-bottom:8px;font-size:1.5rem">Créer une salle</h2>
+  <p class="subtitle" style="margin-bottom:24px">Entre ton prénom, puis partage le code aux autres</p>
+  <input id="mp-host-name-input" class="music-input" placeholder="Ton prénom…" maxlength="20" style="margin-bottom:16px" onkeydown="if(event.key==='Enter')initHostRoom()" />
+  <button class="btn" onclick="initHostRoom()">Créer la salle →</button>
+  <button class="btn ghost" onclick="showScreen('screen-mp-mode')" style="margin-top:12px;width:auto;padding:14px 28px">← Retour</button>
+</div>
+
+<!-- MP: Lobby hôte -->
+<div id="screen-mp-lobby" class="screen">
+  <div style="text-align:center;margin-bottom:20px">
+    <p style="font-size:.8rem;color:var(--muted);letter-spacing:.1em;margin-bottom:6px">CODE DE LA SALLE</p>
+    <div id="mp-room-code-display" style="font-size:3.2rem;font-weight:900;letter-spacing:.25em;color:var(--yellow);font-family:monospace">????</div>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:6px">Partagez ce code aux autres joueurs</p>
+  </div>
+  <div id="mp-host-name-display" style="text-align:center;margin-bottom:10px;font-size:.9rem;color:var(--muted)"></div>
+  <div id="mp-lobby-count" style="text-align:center;font-size:.85rem;color:var(--muted);margin-bottom:14px">1 / 4 joueurs</div>
+  <div id="mp-lobby-players" style="width:100%;margin-bottom:20px"></div>
+  <button class="btn" id="mp-launch-btn" onclick="launchMPGame()">🚀 Lancer la partie</button>
+  <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:8px">Vous pouvez lancer avec 1 à 4 joueurs</p>
+</div>
+
+<!-- MP: Rejoindre (joueur) -->
+<div id="screen-mp-join" class="screen">
+  <div class="logo">🔗</div>
+  <h2 style="margin-bottom:8px;font-size:1.5rem">Rejoindre une salle</h2>
+  <p class="subtitle" style="margin-bottom:24px">Entre le code et ton prénom</p>
+  <input id="mp-join-code-input" class="music-input" placeholder="Code (ex: AB3K)" maxlength="4"
+    style="text-transform:uppercase;letter-spacing:.2em;font-size:1.5rem;text-align:center;margin-bottom:12px"
+    onkeydown="if(event.key==='Enter')document.getElementById('mp-join-name-input').focus()" />
+  <input id="mp-join-name-input" class="music-input" placeholder="Ton prénom…" maxlength="20"
+    style="margin-bottom:16px" onkeydown="if(event.key==='Enter')joinRoom()" />
+  <button class="btn" onclick="joinRoom()">Rejoindre →</button>
+  <button class="btn ghost" onclick="showScreen('screen-mp-mode')" style="margin-top:12px;width:auto;padding:14px 28px">← Retour</button>
+</div>
+
+<!-- MP: Attente (joueur) -->
+<div id="screen-mp-waiting" class="screen">
+  <div class="logo" style="font-size:3rem">⏳</div>
+  <div id="mp-waiting-info" style="font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:12px;color:var(--yellow)"></div>
+  <div id="mp-waiting-count" style="color:var(--muted);font-size:.9rem;text-align:center;margin-bottom:24px"></div>
+  <p style="color:var(--muted);text-align:center;font-size:.88rem;padding:0 20px">En attente que l'hôte lance la partie…</p>
+</div>
+
+<!-- MP: Écran joueur (pendant la partie) -->
+<div id="screen-mp-player" class="screen">
+  <div id="mp-my-score-display" style="font-size:.9rem;font-weight:700;text-align:center;margin-bottom:18px;padding:8px 16px;background:rgba(255,255,255,.06);border-radius:20px">0 pt · 🎤 0</div>
+  <div id="mp-player-status" style="font-size:1rem;text-align:center;margin-bottom:28px;min-height:52px;color:var(--text);line-height:1.4">⏳ En attente…</div>
+  <!-- Bouton buzz -->
+  <div id="mp-player-buzz-btn" style="display:none;width:100%;text-align:center;margin-bottom:20px">
+    <button onclick="playerBuzz()" style="width:180px;height:180px;border-radius:50%;background:var(--red);color:#fff;font-size:1.5rem;font-weight:900;border:none;cursor:pointer;box-shadow:0 0 50px #EF444466;display:inline-flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;-webkit-tap-highlight-color:transparent;touch-action:manipulation">
+      <span style="font-size:2.2rem">🔔</span>BUZZ !
+    </button>
+  </div>
+  <!-- Boutons de choix -->
+  <div id="mp-player-choices" style="display:none;width:100%;display:none"></div>
+  <!-- Zone de saisie texte (après buzz gagné) -->
+  <div id="mp-player-text-area" style="display:none;width:100%">
+    <input id="mp-player-text-input" class="music-input" placeholder="Ta réponse…" style="margin-bottom:12px" onkeydown="if(event.key==='Enter')playerSubmitText()" />
+    <button class="btn" onclick="playerSubmitText()">Envoyer →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FLOTTANTS MP (hors .screen, visibles pendant la partie) -->
+<!-- ============================================================ -->
+
+<!-- Barre de score flottante (hôte uniquement) -->
+<div id="mp-scoreboard" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#111827f0;border-top:1px solid rgba(255,255,255,.12);padding:8px 12px;z-index:100;backdrop-filter:blur(8px)">
+  <div id="mp-scoreboard-inner" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"></div>
+</div>
+
+<!-- Overlay BUZZ pour l'hôte (M1 et M3) -->
+<div id="mp-host-buzz-overlay" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:99;flex-direction:column;align-items:center;gap:12px">
+  <button onclick="hostBuzz()" style="width:150px;height:150px;border-radius:50%;background:var(--red);color:#fff;font-size:1.3rem;font-weight:900;border:none;cursor:pointer;box-shadow:0 0 50px #EF444466;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;-webkit-tap-highlight-color:transparent;touch-action:manipulation">
+    <span style="font-size:2rem">🔔</span>BUZZ !
+  </button>
+</div>
+<!-- Statut buzz gagnant (hôte) -->
+<div id="mp-buzz-winner-status" style="display:none;position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);padding:10px 20px;border-radius:20px;font-size:.95rem;font-weight:700;z-index:98;white-space:nowrap;border:1px solid rgba(255,255,255,.15)"></div>
 
 <!-- ============================================================ -->
 <!-- DONNÉES -->
@@ -784,6 +884,13 @@ function loadMusicExtrait() {
   document.getElementById('m1-play-btn').textContent = '⏸';
   updateTime();
 
+  // MP : masquer l'input, montrer overlay buzz
+  if (mpMode && mpIsHost) {
+    document.getElementById('m1-input-zone').style.display = 'none';
+    showHostBuzzOverlay('buzz_m1');
+    mpBroadcast({type:'buzz_prompt', text:'🎵 Écoutez et buzzez !', phase:'buzz_m1'});
+  }
+
   showScreen('screen-music');
 }
 
@@ -904,6 +1011,12 @@ function submitMusicAnswer() {
     fbAnswer.textContent = `C'était : ${song.title} — ${song.artist}`;
     showNextButton();
   }
+  // MP : diffuser le résultat
+  if (mpMode && mpIsHost) {
+    mpBroadcast({type:'music_result', correct:isCorrect, title:song.title, artist:song.artist, winnerId:'host'});
+    mpBuzzWinnerId = null;
+    updateMPScoreboard();
+  }
 }
 
 function showNextButton() {
@@ -926,6 +1039,13 @@ function nextMusic() {
     document.getElementById('m1-end-score').textContent = score;
     document.getElementById('m1-end-score-label').textContent = `/ ${SONGS.length} pts`;
     document.getElementById('m1-end-mots').textContent = `🎤 ${motsDImpro} mot${motsDImpro !== 1 ? 's' : ''}`;
+    const yearEl = document.getElementById('m1-end-year');
+    if (discoveredYear !== null) {
+      yearEl.textContent = `📅 Année découverte : ${discoveredYear}`;
+      yearEl.style.display = '';
+    } else {
+      yearEl.style.display = 'none';
+    }
     showScreen('screen-m1-end');
   }
 }
@@ -975,11 +1095,25 @@ function loadVisual() {
   document.getElementById('m2-feedback').innerHTML = '';
   document.getElementById('m2-milestone').style.display = 'none';
 
+  // MP : diffuser les choix aux joueurs
+  if (mpMode && mpIsHost) {
+    mpCurrentPhase = 'pick_m2';
+    mpQuestionLocked = false;
+    mpBroadcast({type:'show_choices',
+      answers: ['🎬 Film', '📺 Série Télé', '📣 Pub', '🎮 Jeu Vidéo'],
+      catKeys: ['film','serie','pub','jeu-video'],
+      question: 'Film, Série, Pub ou Jeu Vidéo ?'
+    });
+  }
+
   showScreen('screen-m2');
 }
 
 function selectVisual(cat) {
   if (visualAnswered) return;
+  // MP : bloquer si un autre joueur a déjà répondu
+  if (mpMode && mpIsHost && mpQuestionLocked && !mpPickingPlayerId) return;
+  if (mpMode && mpIsHost && !mpPickingPlayerId) mpQuestionLocked = true;
   visualAnswered = true;
   const v = VISUALS[visualIndex];
   const ok = cat === v.correct;
@@ -995,6 +1129,12 @@ function selectVisual(cat) {
 
   if (ok) {
     score++;
+    // MP : si c'est un joueur distant qui a répondu, corriger le score
+    if (mpMode && mpIsHost && mpPickingPlayerId && mpPickingPlayerId !== 'host') {
+      score--;
+      const p = mpPlayers.find(pl => pl.id === mpPickingPlayerId);
+      if (p) p.score++;
+    }
     document.getElementById('m2-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
     document.getElementById('m2-score').classList.add('pop');
     setTimeout(() => document.getElementById('m2-score').classList.remove('pop'), 400);
@@ -1012,6 +1152,14 @@ function selectVisual(cat) {
   const fb = document.getElementById('m2-feedback');
   fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
   fb.innerHTML = `<strong>${ok ? '✅ ' + CAT_LABELS[v.correct] + ' !' : '❌ C\'était : ' + CAT_LABELS[v.correct]}</strong><span style="font-size:.88rem;color:var(--muted);display:block;margin-top:3px">${v.title}</span>`;
+
+  // MP : diffuser le résultat
+  if (mpMode && mpIsHost) {
+    const cats = Object.keys(CAT_LABELS);
+    mpBroadcast({type:'pick_result', idx:cats.indexOf(cat), correct:cats.indexOf(v.correct), winnerId:mpPickingPlayerId || 'host'});
+    mpPickingPlayerId = null;
+    updateMPScoreboard();
+  }
 
   setTimeout(() => nextVisual(), ok ? 3000 : 3500);
 }
@@ -1081,6 +1229,12 @@ function startStarRound() {
   audio.play().catch(() => {});
   startM3Wave();
 
+  // MP : buzz mode pour M3
+  if (mpMode && mpIsHost) {
+    showHostBuzzOverlay('buzz_m3');
+    mpBroadcast({type:'buzz_prompt', text:'👤 Qui est cette star ? Buzzez !', phase:'buzz_m3'});
+  }
+
   showScreen('screen-m3');
 }
 
@@ -1136,6 +1290,12 @@ function pressBuzzer() {
   document.getElementById('m3-buzzer-area').style.display = 'none';
   document.getElementById('m3-answer-area').style.display = 'block';
   setTimeout(() => document.getElementById('m3-input').focus(), 100);
+  // MP : hôte a buzzé en premier
+  if (mpMode && mpIsHost && !mpBuzzWinnerId) {
+    mpBuzzWinnerId = 'host';
+    document.getElementById('mp-host-buzz-overlay').style.display = 'none';
+    mpBroadcast({type:'buzz_won', winnerId:'host', winnerName:mpMyName, winnerEmoji:MP_COLORS[0].emoji});
+  }
 }
 
 function validateStarAnswer() {
@@ -1176,6 +1336,13 @@ function validateStarAnswer() {
   fb.innerHTML = ok
     ? `<strong>✅ ${STAR.name} !</strong><div style="margin-top:6px;font-size:.85rem;color:var(--muted)">+1 pt · 🎤 +1 mot d'impro</div>`
     : `<strong>❌ C'était ${STAR.name}</strong>`;
+
+  // MP : diffuser le résultat
+  if (mpMode && mpIsHost) {
+    mpBroadcast({type:'star_result', correct:ok, name:STAR.name, winnerId:'host'});
+    mpBuzzWinnerId = null;
+    updateMPScoreboard();
+  }
 
   setTimeout(() => {
     fb.innerHTML += `<div style="margin-top:14px"><button class="btn" onclick="goToManche4()">Manche suivante →</button></div>`;
@@ -1294,11 +1461,22 @@ function showMCQQuestion() {
   document.getElementById('feedback').className = 'feedback';
   document.getElementById('feedback').innerHTML = '';
   startTimer();
+
+  // MP : diffuser les choix aux joueurs
+  if (mpMode && mpIsHost) {
+    mpCurrentPhase = 'pick_m4';
+    mpQuestionLocked = false;
+    mpBroadcast({type:'show_choices', answers:q.answers, question:q.debut || q.caption || q.hint || '', phase:'pick_m4'});
+  }
+
   showScreen('screen-question');
 }
 
 function selectMCQAnswer(idx, q) {
   stopTimer(); stopPixelReveal();
+  // MP : bloquer si déjà répondu par quelqu'un d'autre
+  if (mpMode && mpIsHost && mpQuestionLocked && !mpPickingPlayerId) return;
+  if (mpMode && mpIsHost && !mpPickingPlayerId) mpQuestionLocked = true;
   const btns = document.querySelectorAll('.ans-btn');
   const ok = idx === q.correct;
   btns.forEach((b, i) => {
@@ -1308,6 +1486,12 @@ function selectMCQAnswer(idx, q) {
   });
   if (ok) {
     score++;
+    // MP : si joueur distant a répondu, corriger le score
+    if (mpMode && mpIsHost && mpPickingPlayerId && mpPickingPlayerId !== 'host') {
+      score--;
+      const p = mpPlayers.find(pl => pl.id === mpPickingPlayerId);
+      if (p) p.score++;
+    }
     document.getElementById('q-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
     document.getElementById('q-score').classList.add('pop');
     setTimeout(() => document.getElementById('q-score').classList.remove('pop'), 400);
@@ -1324,6 +1508,12 @@ function selectMCQAnswer(idx, q) {
   const fb = document.getElementById('feedback');
   fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
   fb.innerHTML = `<strong>${ok ? '✅ Bonne réponse !' : '❌ Raté...'}</strong>${q.feedback}`;
+  // MP : diffuser le résultat
+  if (mpMode && mpIsHost) {
+    mpBroadcast({type:'pick_result', idx, correct:q.correct, winnerId:mpPickingPlayerId || 'host'});
+    mpPickingPlayerId = null;
+    updateMPScoreboard();
+  }
   setTimeout(() => nextMCQ(), 5000);
 }
 
@@ -1422,6 +1612,13 @@ const MOTS_IMPRO_POOL = [
 ];
 
 function showFinalScore() {
+  // MP : synchroniser et diffuser
+  if (mpMode && mpIsHost) {
+    const hostP = mpPlayers.find(p => p.id === 'host');
+    if (hostP) { hostP.score = score; hostP.mots = motsDImpro; }
+    mpBroadcast({type:'game_over', players: mpPlayers.map(stripConn)});
+    document.getElementById('mp-scoreboard').style.display = 'none';
+  }
   const total = SONGS.length + VISUALS.length + 1 + ROUNDS_MCQ.reduce((a,r) => a+r.questions.length, 0);
   document.getElementById('final-score').textContent = score;
   document.getElementById('final-pts-label').textContent = `/ ${total} pts`;
@@ -1483,6 +1680,475 @@ function startGame() {
   starDone = false; buzzerPressed = false;
   currentMCQRound = 0; currentMCQQ = 0;
   showRoundIntro(0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── MULTIJOUEUR (PeerJS WebRTC) ───────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MP_PREFIX = 'talaref26-';
+const MP_COLORS = [
+  {hex:'#EF4444', emoji:'🔴'},
+  {hex:'#3B82F6', emoji:'🔵'},
+  {hex:'#22C55E', emoji:'🟢'},
+  {hex:'#EAB308', emoji:'🟡'}
+];
+
+let mpMode = false;
+let mpIsHost = false;
+let mpPeer = null;
+let mpHostConn = null;
+let mpPlayerConns = {};
+let mpPlayers = [];
+let mpMyId = '';
+let mpMyName = '';
+let mpRoomCode = '';
+let mpBuzzWinnerId = null;
+let mpQuestionLocked = false;
+let mpCurrentPhase = '';
+let mpPickingPlayerId = null;
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────────
+function showMPMode() {
+  showScreen('screen-mp-mode');
+}
+
+function startSolo() {
+  mpMode = false;
+  mpIsHost = false;
+  startGame();
+}
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function stripConn(p) {
+  return {id:p.id, name:p.name, color:p.color, emoji:p.emoji, score:p.score, mots:p.mots};
+}
+
+// ── HÔTE : CRÉER UNE SALLE ────────────────────────────────────────────────────
+function initHostRoom() {
+  const name = document.getElementById('mp-host-name-input').value.trim();
+  if (!name) { alert('Entre ton prénom'); return; }
+  mpMyName = name;
+  mpIsHost = true;
+  mpMode = true;
+  mpMyId = 'host';
+  mpRoomCode = generateRoomCode();
+  mpPlayers = [{id:'host', name, color:MP_COLORS[0].hex, emoji:MP_COLORS[0].emoji, score:0, mots:0}];
+  mpPlayerConns = {};
+  mpBuzzWinnerId = null;
+  mpQuestionLocked = false;
+
+  if (mpPeer) { try { mpPeer.destroy(); } catch(e) {} }
+  mpPeer = new Peer(MP_PREFIX + mpRoomCode);
+
+  mpPeer.on('open', () => {
+    document.getElementById('mp-room-code-display').textContent = mpRoomCode;
+    document.getElementById('mp-host-name-display').textContent = `${MP_COLORS[0].emoji} ${name}`;
+    updateHostLobby();
+    showScreen('screen-mp-lobby');
+  });
+
+  mpPeer.on('connection', conn => {
+    conn.on('open', () => {
+      conn.on('data', data => handleHostMessage(data, conn));
+    });
+    conn.on('close', () => {
+      const pid = Object.keys(mpPlayerConns).find(k => mpPlayerConns[k] === conn);
+      if (pid) {
+        delete mpPlayerConns[pid];
+        mpPlayers = mpPlayers.filter(p => p.id !== pid);
+        updateHostLobby();
+        mpBroadcast({type:'player_list', players: mpPlayers.map(stripConn)});
+      }
+    });
+  });
+
+  mpPeer.on('error', err => {
+    if (err.type === 'unavailable-id') {
+      mpRoomCode = generateRoomCode();
+      mpPeer.destroy();
+      setTimeout(initHostRoom, 300);
+    } else {
+      alert('Erreur réseau : ' + (err.message || err.type));
+    }
+  });
+}
+
+function updateHostLobby() {
+  const list = document.getElementById('mp-lobby-players');
+  if (!list) return;
+  list.innerHTML = mpPlayers.map(p =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:10px;margin-bottom:8px">
+      <span style="font-size:1.5rem">${p.emoji}</span>
+      <span style="font-weight:600">${p.name}</span>
+    </div>`
+  ).join('');
+  const count = mpPlayers.length;
+  const el = document.getElementById('mp-lobby-count');
+  if (el) el.textContent = `${count} / 4 joueur${count>1?'s':''}`;
+}
+
+function launchMPGame() {
+  mpBroadcast({type:'game_start', players: mpPlayers.map(stripConn)});
+  document.getElementById('mp-scoreboard').style.display = '';
+  startGame();
+}
+
+// ── JOUEUR : REJOINDRE ────────────────────────────────────────────────────────
+function joinRoom() {
+  const code = document.getElementById('mp-join-code-input').value.trim().toUpperCase();
+  const name = document.getElementById('mp-join-name-input').value.trim();
+  if (code.length !== 4) { alert('Code à 4 caractères requis'); return; }
+  if (!name) { alert('Entre ton prénom'); return; }
+  mpMyName = name;
+  mpIsHost = false;
+  mpMode = true;
+  mpRoomCode = code;
+
+  if (mpPeer) { try { mpPeer.destroy(); } catch(e) {} }
+  mpPeer = new Peer();
+
+  mpPeer.on('open', myId => {
+    mpMyId = myId;
+    mpHostConn = mpPeer.connect(MP_PREFIX + code);
+    mpHostConn.on('open', () => {
+      mpHostConn.send({type:'join', id:myId, name});
+      document.getElementById('mp-waiting-info').textContent = name;
+      showScreen('screen-mp-waiting');
+    });
+    mpHostConn.on('data', data => handlePlayerMessage(data));
+    mpHostConn.on('error', () => alert('Connexion impossible — vérifie le code.'));
+    mpHostConn.on('close', () => setPlayerStatus('⚠️ Connexion perdue'));
+  });
+  mpPeer.on('error', () => alert('Impossible de rejoindre. Code invalide ?'));
+}
+
+// ── HÔTE : RÉCEPTION DES MESSAGES ─────────────────────────────────────────────
+function handleHostMessage(data, conn) {
+  if (data.type === 'join') {
+    if (mpPlayers.find(p => p.id === data.id)) return;
+    const colorIdx = Math.min(mpPlayers.length, 3);
+    mpPlayerConns[data.id] = conn;
+    mpPlayers.push({
+      id: data.id, name: data.name,
+      color: MP_COLORS[colorIdx].hex, emoji: MP_COLORS[colorIdx].emoji,
+      score: 0, mots: 0
+    });
+    updateHostLobby();
+    mpBroadcast({type:'player_list', players: mpPlayers.map(stripConn)});
+    return;
+  }
+
+  if (data.type === 'buzz') {
+    if (mpBuzzWinnerId) return;
+    mpBuzzWinnerId = data.id;
+    const winner = mpPlayers.find(p => p.id === data.id);
+    mpBroadcast({type:'buzz_won', winnerId:data.id, winnerName:winner?.name||'?', winnerEmoji:winner?.emoji||'🎤'});
+    mpShowBuzzWinnerOnHost(data.id);
+    return;
+  }
+
+  if (data.type === 'text_answer') {
+    if (data.id !== mpBuzzWinnerId) return;
+    mpProcessTextAnswer(data.answer, data.id);
+    return;
+  }
+
+  if (data.type === 'pick') {
+    if (mpQuestionLocked) return;
+    mpQuestionLocked = true;
+    mpProcessPick(data.idx, data.id);
+    return;
+  }
+}
+
+function mpShowBuzzWinnerOnHost(winnerId) {
+  const overlay = document.getElementById('mp-host-buzz-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const winner = mpPlayers.find(p => p.id === winnerId);
+  const statusEl = document.getElementById('mp-buzz-winner-status');
+
+  if (winnerId === 'host') {
+    if (statusEl) statusEl.style.display = 'none';
+    if (mpCurrentPhase === 'buzz_m1') {
+      document.getElementById('m1-input-zone').style.display = '';
+      document.getElementById('m1-input').disabled = false;
+      setTimeout(() => document.getElementById('m1-input').focus(), 100);
+    } else if (mpCurrentPhase === 'buzz_m3') {
+      if (!buzzerPressed) pressBuzzer();
+    }
+  } else {
+    // Joueur distant a buzzé
+    if (statusEl) {
+      statusEl.textContent = `${winner?.emoji||''} ${winner?.name||''} répond…`;
+      statusEl.style.display = '';
+    }
+    // Pour M3 : verrouiller le buzzer hôte
+    if (mpCurrentPhase === 'buzz_m3') {
+      buzzerPressed = true;
+      document.getElementById('m3-buzzer-area').style.display = 'none';
+    }
+  }
+}
+
+function mpProcessTextAnswer(answer, playerId) {
+  const player = mpPlayers.find(p => p.id === playerId);
+  const statusEl = document.getElementById('mp-buzz-winner-status');
+  if (statusEl) statusEl.style.display = 'none';
+
+  if (mpCurrentPhase === 'buzz_m1') {
+    const song = SONGS[musicIndex];
+    const ok = checkMusicAnswer(answer, song);
+    if (ok && player) player.score++;
+    musicAnswered = true;
+    musicDots[musicIndex] = ok ? 'correct' : 'wrong';
+    renderMusicDots();
+    const fb = document.getElementById('m1-feedback');
+    const fbTitle = document.getElementById('m1-fb-title');
+    const fbAnswer = document.getElementById('m1-fb-answer');
+    fb.className = 'music-feedback show ' + (ok ? 'correct' : 'wrong');
+    fbTitle.textContent = ok
+      ? `✅ ${player?.emoji||''} ${player?.name||''} : Bonne réponse !`
+      : `❌ ${player?.emoji||''} ${player?.name||''} : Raté !`;
+    fbAnswer.textContent = ok ? `${song.title} — ${song.artist}` : `C'était : ${song.title} — ${song.artist}`;
+    document.getElementById('m1-audio').pause();
+    document.getElementById('m1-submit-btn').style.display = 'none';
+    mpBroadcast({type:'music_result', correct:ok, title:song.title, artist:song.artist, winnerId:playerId});
+    mpBuzzWinnerId = null;
+    updateMPScoreboard();
+    showNextButton();
+
+  } else if (mpCurrentPhase === 'buzz_m3') {
+    const n = norm(answer);
+    const ok = STAR.acceptedAnswers.some(a => {
+      const na = norm(a);
+      return na === n || (na.includes(n) && n.length >= 3);
+    });
+    if (ok && player) { player.score++; player.mots++; starFound = true; }
+    starDone = true;
+    stopPixelRevealStar();
+    starBlockSize = 1; drawPixelatedStar(1);
+    document.getElementById('m3-audio').pause(); stopM3Wave();
+    document.getElementById('m3-buzzer-area').style.display = 'none';
+    document.getElementById('m3-answer-area').style.display = 'none';
+    const fb = document.getElementById('m3-feedback');
+    fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+    fb.innerHTML = ok
+      ? `<strong>✅ ${player?.emoji||''} ${player?.name||''} : ${STAR.name} !</strong>`
+      : `<strong>❌ ${player?.emoji||''} ${player?.name||''} : C'était ${STAR.name}</strong>`;
+    mpBroadcast({type:'star_result', correct:ok, name:STAR.name, winnerId:playerId});
+    mpBuzzWinnerId = null;
+    updateMPScoreboard();
+    setTimeout(() => {
+      fb.innerHTML += `<div style="margin-top:14px"><button class="btn" onclick="goToManche4()">Manche suivante →</button></div>`;
+    }, 2000);
+  }
+}
+
+function mpProcessPick(idx, playerId) {
+  mpPickingPlayerId = playerId;
+  if (mpCurrentPhase === 'pick_m2') {
+    const cats = Object.keys(CAT_LABELS); // ['film','serie','pub','jeu-video']
+    selectVisual(cats[idx] || cats[0]);
+  } else if (mpCurrentPhase === 'pick_m4') {
+    const r = ROUNDS_MCQ[currentMCQRound];
+    const q = r.questions[currentMCQQ];
+    selectMCQAnswer(idx, q);
+  }
+  mpPickingPlayerId = null;
+}
+
+// ── JOUEUR : RÉCEPTION DES MESSAGES ───────────────────────────────────────────
+function handlePlayerMessage(data) {
+  if (data.type === 'player_list') {
+    mpPlayers = data.players;
+    updatePlayerWaiting();
+  }
+  if (data.type === 'game_start') {
+    mpPlayers = data.players;
+    showScreen('screen-mp-player');
+    setPlayerStatus('⏳ En attente de la première question…');
+    showPlayerUI('wait');
+    syncMyScore();
+  }
+  if (data.type === 'buzz_prompt') {
+    setPlayerStatus(data.text || '🎵 Écoutez et buzzez !');
+    showPlayerUI('buzz');
+  }
+  if (data.type === 'show_choices') {
+    setPlayerStatus(data.question || '❓ Choisissez !');
+    showPlayerChoices(data.answers);
+  }
+  if (data.type === 'buzz_won') {
+    if (data.winnerId === mpMyId) {
+      setPlayerStatus('🎤 C\'est toi ! Tape ta réponse !');
+      showPlayerUI('text');
+    } else {
+      setPlayerStatus(`${data.winnerEmoji} ${data.winnerName} répond…`);
+      showPlayerUI('wait');
+    }
+  }
+  if (data.type === 'music_result') {
+    setPlayerStatus(data.correct ? `✅ ${data.title} — ${data.artist}` : `❌ C'était : ${data.title} — ${data.artist}`);
+    showPlayerUI('wait');
+  }
+  if (data.type === 'star_result') {
+    setPlayerStatus(data.correct ? `✅ C'était ${data.name} !` : `❌ C'était ${data.name}`);
+    showPlayerUI('wait');
+  }
+  if (data.type === 'pick_result') {
+    colorPlayerChoices(data.idx, data.correct);
+  }
+  if (data.type === 'scores') {
+    mpPlayers = data.players;
+    syncMyScore();
+  }
+  if (data.type === 'game_over') {
+    mpPlayers = data.players;
+    syncMyScore();
+    showPlayerGameOver();
+  }
+}
+
+// ── UI JOUEUR ─────────────────────────────────────────────────────────────────
+function setPlayerStatus(text) {
+  const el = document.getElementById('mp-player-status');
+  if (el) el.textContent = text;
+}
+
+function showPlayerUI(mode) {
+  const buzz = document.getElementById('mp-player-buzz-btn');
+  const choices = document.getElementById('mp-player-choices');
+  const textArea = document.getElementById('mp-player-text-area');
+  if (buzz) buzz.style.display = mode === 'buzz' ? '' : 'none';
+  if (choices && mode !== 'choices') choices.style.display = 'none';
+  if (textArea) textArea.style.display = mode === 'text' ? '' : 'none';
+  if (mode === 'text') setTimeout(() => document.getElementById('mp-player-text-input')?.focus(), 100);
+}
+
+function showPlayerChoices(answers) {
+  const cont = document.getElementById('mp-player-choices');
+  cont.style.display = '';
+  cont.innerHTML = answers.map((a, i) =>
+    `<button class="ans-btn" onclick="playerPickChoice(${i})">${a}</button>`
+  ).join('');
+  document.getElementById('mp-player-buzz-btn').style.display = 'none';
+  document.getElementById('mp-player-text-area').style.display = 'none';
+}
+
+function colorPlayerChoices(winnerIdx, correctIdx) {
+  const cont = document.getElementById('mp-player-choices');
+  if (!cont) return;
+  cont.querySelectorAll('button').forEach((b, i) => {
+    b.disabled = true;
+    if (i === correctIdx) b.classList.add('correct');
+    else if (i === winnerIdx && i !== correctIdx) b.classList.add('wrong');
+    else b.classList.add('disabled');
+  });
+}
+
+function syncMyScore() {
+  const me = mpPlayers.find(p => p.id === mpMyId);
+  if (!me) return;
+  const el = document.getElementById('mp-my-score-display');
+  if (el) el.textContent = `${me.emoji} ${me.score} pt${me.score!==1?'s':''} · 🎤 ${me.mots}`;
+}
+
+function updatePlayerWaiting() {
+  const me = mpPlayers.find(p => p.id === mpMyId);
+  const nameEl = document.getElementById('mp-waiting-info');
+  if (nameEl && me) nameEl.innerHTML = `<span style="font-size:2.5rem">${me.emoji}</span><br>${me.name}`;
+  const countEl = document.getElementById('mp-waiting-count');
+  if (countEl) countEl.textContent = `${mpPlayers.length} joueur${mpPlayers.length>1?'s':''} connecté${mpPlayers.length>1?'s':''}`;
+}
+
+function showPlayerGameOver() {
+  setPlayerStatus('🏁 Partie terminée !');
+  const cont = document.getElementById('mp-player-choices');
+  cont.style.display = '';
+  cont.innerHTML = `<div style="font-size:.88rem;text-align:center;width:100%">
+    ${[...mpPlayers].sort((a,b)=>b.score-a.score).map((p,i) =>
+      `<div style="padding:9px 14px;margin:5px 0;background:${p.color}22;border:1.5px solid ${p.color};border-radius:10px;display:flex;align-items:center;gap:8px">
+        <span>${['🏆','🥈','🥉'][i]||''}</span>
+        <span style="font-size:1.2rem">${p.emoji}</span>
+        <strong>${p.name}</strong>
+        <span style="margin-left:auto">${p.score} pts · 🎤${p.mots}</span>
+      </div>`
+    ).join('')}
+  </div>`;
+  document.getElementById('mp-player-buzz-btn').style.display = 'none';
+  document.getElementById('mp-player-text-area').style.display = 'none';
+}
+
+// ── ACTIONS JOUEUR ────────────────────────────────────────────────────────────
+function playerBuzz() {
+  if (!mpHostConn) return;
+  mpHostConn.send({type:'buzz', id:mpMyId});
+  showPlayerUI('wait');
+  setPlayerStatus('📡 Buzz envoyé…');
+}
+
+function playerPickChoice(idx) {
+  if (!mpHostConn) return;
+  const cont = document.getElementById('mp-player-choices');
+  if (cont) cont.querySelectorAll('button').forEach(b => b.disabled = true);
+  mpHostConn.send({type:'pick', id:mpMyId, idx});
+}
+
+function playerSubmitText() {
+  const input = document.getElementById('mp-player-text-input');
+  if (!input || !input.value.trim()) return;
+  mpHostConn.send({type:'text_answer', id:mpMyId, answer:input.value.trim()});
+  showPlayerUI('wait');
+  setPlayerStatus('📡 Réponse envoyée…');
+}
+
+// ── HÔTE : BUZZ OVERLAY ───────────────────────────────────────────────────────
+function showHostBuzzOverlay(phase) {
+  mpCurrentPhase = phase;
+  mpBuzzWinnerId = null;
+  const overlay = document.getElementById('mp-host-buzz-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  const statusEl = document.getElementById('mp-buzz-winner-status');
+  if (statusEl) statusEl.style.display = 'none';
+}
+
+function hostBuzz() {
+  if (mpBuzzWinnerId) return;
+  mpBuzzWinnerId = 'host';
+  const overlay = document.getElementById('mp-host-buzz-overlay');
+  if (overlay) overlay.style.display = 'none';
+  mpBroadcast({type:'buzz_won', winnerId:'host', winnerName:mpMyName, winnerEmoji:MP_COLORS[0].emoji});
+  mpShowBuzzWinnerOnHost('host');
+}
+
+// ── SCOREBOARD HÔTE ───────────────────────────────────────────────────────────
+function updateMPScoreboard() {
+  if (!mpMode || !mpIsHost) return;
+  const hostP = mpPlayers.find(p => p.id === 'host');
+  if (hostP) { hostP.score = score; hostP.mots = motsDImpro; }
+  const bar = document.getElementById('mp-scoreboard-inner');
+  if (!bar) return;
+  bar.innerHTML = mpPlayers.map(p =>
+    `<div style="display:flex;align-items:center;gap:4px;padding:5px 10px;background:${p.color}22;border:1.5px solid ${p.color};border-radius:8px;font-size:.78rem;white-space:nowrap">
+      <span>${p.emoji}</span>
+      <span style="font-weight:700;color:${p.color}">${p.score}</span>
+      <span style="color:var(--muted)">🎤${p.mots}</span>
+    </div>`
+  ).join('');
+  mpBroadcast({type:'scores', players: mpPlayers.map(stripConn)});
+}
+
+function mpBroadcast(msg) {
+  Object.values(mpPlayerConns).forEach(conn => {
+    try { conn.send(msg); } catch(e) {}
+  });
 }
 </script>
 </body>
