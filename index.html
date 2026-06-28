@@ -256,6 +256,7 @@
   .verdict-sub { color: var(--muted); font-size: .88rem; margin-bottom: 28px; }
 </style>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -583,7 +584,10 @@
   <div style="text-align:center;margin-bottom:20px">
     <p style="font-size:.8rem;color:var(--muted);letter-spacing:.1em;margin-bottom:6px">CODE DE LA SALLE</p>
     <div id="mp-room-code-display" style="font-size:3.2rem;font-weight:900;letter-spacing:.25em;color:var(--yellow);font-family:monospace">????</div>
-    <p style="font-size:.78rem;color:var(--muted);margin-top:6px">Partagez ce code aux autres joueurs</p>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:6px">Scannez le QR ou entrez le code</p>
+  </div>
+  <div id="mp-qrcode" style="display:flex;justify-content:center;margin-bottom:16px">
+    <div id="mp-qrcode-inner" style="background:#fff;padding:10px;border-radius:12px;display:inline-block"></div>
   </div>
   <div id="mp-host-name-display" style="text-align:center;margin-bottom:10px;font-size:.9rem;color:var(--muted)"></div>
   <div id="mp-lobby-count" style="text-align:center;font-size:.85rem;color:var(--muted);margin-bottom:14px">1 / 4 joueurs</div>
@@ -616,8 +620,11 @@
 
 <!-- MP: Écran joueur (pendant la partie) -->
 <div id="screen-mp-player" class="screen">
+  <audio id="mp-player-audio" style="display:none"></audio>
   <div id="mp-my-score-display" style="font-size:.9rem;font-weight:700;text-align:center;margin-bottom:18px;padding:8px 16px;background:rgba(255,255,255,.06);border-radius:20px">0 pt · 🎤 0</div>
-  <div id="mp-player-status" style="font-size:1rem;text-align:center;margin-bottom:28px;min-height:52px;color:var(--text);line-height:1.4">⏳ En attente…</div>
+  <!-- Image (M2 visuels) -->
+  <img id="mp-player-img" style="display:none;width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin-bottom:14px" />
+  <div id="mp-player-status" style="font-size:1rem;text-align:center;margin-bottom:20px;min-height:40px;color:var(--text);line-height:1.4">⏳ En attente…</div>
   <!-- Bouton buzz -->
   <div id="mp-player-buzz-btn" style="display:none;width:100%;text-align:center;margin-bottom:20px">
     <button onclick="playerBuzz()" style="width:180px;height:180px;border-radius:50%;background:var(--red);color:#fff;font-size:1.5rem;font-weight:900;border:none;cursor:pointer;box-shadow:0 0 50px #EF444466;display:inline-flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;-webkit-tap-highlight-color:transparent;touch-action:manipulation">
@@ -888,7 +895,9 @@ function loadMusicExtrait() {
   if (mpMode && mpIsHost) {
     document.getElementById('m1-input-zone').style.display = 'none';
     showHostBuzzOverlay('buzz_m1');
-    mpBroadcast({type:'buzz_prompt', text:'🎵 Écoutez et buzzez !', phase:'buzz_m1'});
+    const song = SONGS[musicIndex];
+    mpBroadcast({type:'buzz_prompt', text:'🎵 Écoutez et buzzez !', phase:'buzz_m1',
+      audioUrl: 'audio/' + song.file});
   }
 
   showScreen('screen-music');
@@ -1095,14 +1104,16 @@ function loadVisual() {
   document.getElementById('m2-feedback').innerHTML = '';
   document.getElementById('m2-milestone').style.display = 'none';
 
-  // MP : diffuser les choix aux joueurs
+  // MP : diffuser les choix aux joueurs avec l'image
   if (mpMode && mpIsHost) {
     mpCurrentPhase = 'pick_m2';
     mpQuestionLocked = false;
+    const v = VISUALS[visualIndex];
     mpBroadcast({type:'show_choices',
       answers: ['🎬 Film', '📺 Série Télé', '📣 Pub', '🎮 Jeu Vidéo'],
       catKeys: ['film','serie','pub','jeu-video'],
-      question: 'Film, Série, Pub ou Jeu Vidéo ?'
+      question: 'Film, Série, Pub ou Jeu Vidéo ?',
+      imageUrl: 'images/' + v.file
     });
   }
 
@@ -1232,7 +1243,8 @@ function startStarRound() {
   // MP : buzz mode pour M3
   if (mpMode && mpIsHost) {
     showHostBuzzOverlay('buzz_m3');
-    mpBroadcast({type:'buzz_prompt', text:'👤 Qui est cette star ? Buzzez !', phase:'buzz_m3'});
+    mpBroadcast({type:'buzz_prompt', text:'👤 Écoutez les indices et buzzez !', phase:'buzz_m3',
+      audioUrl: 'audio/' + STAR.audio});
   }
 
   showScreen('screen-m3');
@@ -1751,6 +1763,11 @@ function initHostRoom() {
     document.getElementById('mp-room-code-display').textContent = mpRoomCode;
     document.getElementById('mp-host-name-display').textContent = `${MP_COLORS[0].emoji} ${name}`;
     updateHostLobby();
+    // Générer le QR code pointant vers l'URL avec le code pré-rempli
+    const joinUrl = window.location.origin + window.location.pathname + '?join=' + mpRoomCode;
+    const qrContainer = document.getElementById('mp-qrcode-inner');
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {text: joinUrl, width: 160, height: 160, colorDark:'#111827', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M});
     showScreen('screen-mp-lobby');
   });
 
@@ -1979,13 +1996,17 @@ function handlePlayerMessage(data) {
   }
   if (data.type === 'buzz_prompt') {
     setPlayerStatus(data.text || '🎵 Écoutez et buzzez !');
+    playerHideImg();
+    if (data.audioUrl) playerPlayAudio(data.audioUrl);
     showPlayerUI('buzz');
   }
   if (data.type === 'show_choices') {
     setPlayerStatus(data.question || '❓ Choisissez !');
+    if (data.imageUrl) playerShowImg(data.imageUrl); else playerHideImg();
     showPlayerChoices(data.answers);
   }
   if (data.type === 'buzz_won') {
+    playerStopAudio();
     if (data.winnerId === mpMyId) {
       setPlayerStatus('🎤 C\'est toi ! Tape ta réponse !');
       showPlayerUI('text');
@@ -1995,14 +2016,17 @@ function handlePlayerMessage(data) {
     }
   }
   if (data.type === 'music_result') {
+    playerStopAudio();
     setPlayerStatus(data.correct ? `✅ ${data.title} — ${data.artist}` : `❌ C'était : ${data.title} — ${data.artist}`);
     showPlayerUI('wait');
   }
   if (data.type === 'star_result') {
+    playerStopAudio();
     setPlayerStatus(data.correct ? `✅ C'était ${data.name} !` : `❌ C'était ${data.name}`);
     showPlayerUI('wait');
   }
   if (data.type === 'pick_result') {
+    playerHideImg();
     colorPlayerChoices(data.idx, data.correct);
   }
   if (data.type === 'scores') {
@@ -2086,6 +2110,28 @@ function showPlayerGameOver() {
   document.getElementById('mp-player-text-area').style.display = 'none';
 }
 
+// ── AUDIO / IMAGE JOUEUR ──────────────────────────────────────────────────────
+function playerPlayAudio(url) {
+  const a = document.getElementById('mp-player-audio');
+  if (!a) return;
+  a.src = url;
+  a.play().catch(() => {});
+}
+function playerStopAudio() {
+  const a = document.getElementById('mp-player-audio');
+  if (a) { a.pause(); a.currentTime = 0; }
+}
+function playerShowImg(url) {
+  const img = document.getElementById('mp-player-img');
+  if (!img) return;
+  img.src = url;
+  img.style.display = '';
+}
+function playerHideImg() {
+  const img = document.getElementById('mp-player-img');
+  if (img) img.style.display = 'none';
+}
+
 // ── ACTIONS JOUEUR ────────────────────────────────────────────────────────────
 function playerBuzz() {
   if (!mpHostConn) return;
@@ -2150,6 +2196,21 @@ function mpBroadcast(msg) {
     try { conn.send(msg); } catch(e) {}
   });
 }
+
+// ── AUTO-FILL depuis URL (?join=ABCD) ─────────────────────────────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const joinCode = params.get('join');
+  if (joinCode) {
+    // Aller directement à l'écran "Rejoindre" avec le code pré-rempli
+    window.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('mp-join-code-input');
+      if (input) input.value = joinCode.toUpperCase();
+      showScreen('screen-mp-join');
+      setTimeout(() => document.getElementById('mp-join-name-input')?.focus(), 100);
+    });
+  }
+})();
 </script>
 </body>
 </html>
