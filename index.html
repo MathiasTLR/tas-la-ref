@@ -543,6 +543,7 @@
     <div class="mots-final" id="final-mots">🎤 0 mot d'impro</div>
     <div class="verdict" id="verdict"></div>
     <div class="verdict-sub" id="verdict-sub"></div>
+    <div id="final-recap" style="display:none;margin-top:14px;background:rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;font-size:.9rem;line-height:1.5;text-align:center;width:100%;box-sizing:border-box"></div>
     <button class="btn" id="btn-reveal-mots" onclick="revealMotsDImpro()" style="margin-top:16px;display:none">🎤 Révéler mes mots d'impro</button>
     <div id="mots-reveles" style="display:none;margin-top:16px;width:100%"></div>
     <button class="btn" onclick="restartGame()" style="margin-top:12px">Rejouer</button>
@@ -583,6 +584,10 @@ const STAR = {
   photo: "star-01.jpg",     // fichier dans images/
   name: "Jeff Bridges",
   acceptedAnswers: ["jeff bridges", "bridges", "jeff", "le dude", "dude"]
+};
+
+const REFERENCE = {
+  genre: "film"  // à adapter selon l'émission
 };
 
 // ── MANCHE 4 : RÉPLIQUES (MCQ) ───────────────────────────────────────────────
@@ -647,6 +652,7 @@ let lastMilestoneMots = 0; // dernier palier de 5 pts atteint pour les mots d'im
 
 // Manche 1
 let yearBonusUsed = false;
+let discoveredYear = null;
 let musicDone = false;
 let musicIndex = 0;
 let musicDots = [];
@@ -660,6 +666,7 @@ let visualAnswered = false;
 
 // Manche 3
 let starDone = false;
+let starFound = false;
 let buzzerPressed = false;
 let starImg = null;
 let starBlockSize = 40;
@@ -1157,6 +1164,7 @@ function validateStarAnswer() {
   if (ok) {
     score++;
     motsDImpro++;
+    starFound = true;
     document.getElementById('m3-score').textContent = score + ' pt' + (score !== 1 ? 's' : '');
     document.getElementById('m3-mots').textContent = '🎤 ' + motsDImpro;
   }
@@ -1212,6 +1220,7 @@ function submitYear() {
 
   if (ok) {
     motsDImpro += 2;
+    discoveredYear = song.year;
     document.getElementById('m1-mots').textContent = '🎤 ' + motsDImpro;
     document.getElementById('m1-year-body').innerHTML = `
       <div class="year-result ok">🎤 +2 mots d'impro ! (${song.year})</div>
@@ -1425,6 +1434,16 @@ function showFinalScore() {
                 ['😅 La réf, c\'est pas toi','Heureusement, Netflix est là.'];
   document.getElementById('verdict').textContent = v;
   document.getElementById('verdict-sub').textContent = s;
+  // Récap de la référence
+  const recapEl = document.getElementById('final-recap');
+  const yearPart = discoveredYear !== null
+    ? `sortie en <strong>${discoveredYear}</strong>, `
+    : '';
+  const starPart = starFound
+    ? `<strong>${STAR.name}</strong>`
+    : '<strong style="opacity:.5">???</strong>';
+  recapEl.innerHTML = `🎬 La référence que vous cherchez est ${yearPart}c'est un <strong>${REFERENCE.genre}</strong> avec ${starPart}.`;
+  recapEl.style.display = '';
   // Bouton révélation
   const btnReveal = document.getElementById('btn-reveal-mots');
   document.getElementById('mots-reveles').style.display = 'none';
@@ -1458,7 +1477,7 @@ function revealMotsDImpro() {
 }
 
 function startGame() {
-  score = 0; motsDImpro = 0; lastMilestoneMots = 0; yearBonusUsed = false;
+  score = 0; motsDImpro = 0; lastMilestoneMots = 0; yearBonusUsed = false; discoveredYear = null; starFound = false;
   musicDone = false; musicIndex = 0; musicDots = Array(SONGS.length).fill('pending');
   visualsDone = false; visualIndex = 0;
   starDone = false; buzzerPressed = false;
